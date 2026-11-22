@@ -1,0 +1,323 @@
+﻿/* YASB Reborn (v2.0.8+) Stylesheet Template */
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "Segoe UI", sans-serif;
+    font-size: 13px;
+    color: #c0caf5;
+    padding: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+/* Root Status Bar Container */
+.yasb-bar {
+    background-color: rgba(26, 27, 38, 0.85);
+    border-bottom: 2px solid #292e42;
+    height: 32px;
+    min-height: 32px;
+    max-height: 32px;
+}
+
+/* Layout Containers */
+.container-left,
+.container-center,
+.container-right {
+    padding: 2px 4px;
+}
+
+/* Base Widget Pill Design */
+.widget,
+.cpu,
+.memory,
+.volume,
+.custom-widget {
+    background-color: rgba(22, 22, 30, 0.8);
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 2px 10px;
+    margin: 2px 3px;
+    color: #c0caf5;
+    font-size: 13px;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.widget:hover {
+    background-color: #24283b;
+    border: 1px solid #bb9af7;
+}
+
+.widget span {
+    color: #7aa2f7;
+    font-size: 13px;
+    margin-right: 5px;
+}
+
+/* Komorebi Workspaces Widget */
+.komorebi-workspaces {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0 4px 0 0;
+}
+
+.komorebi-workspaces .ws-btn {
+    background-color: rgba(22, 22, 30, 0.8);
+    color: #565f89;
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 2px 9px;
+    margin: 2px 2px;
+    min-width: 20px;
+    min-height: 20px;
+    font-weight: 500;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.komorebi-workspaces .ws-btn:hover {
+    background-color: #24283b;
+    color: #c0caf5;
+    border-color: #7aa2f7;
+}
+
+.komorebi-workspaces .ws-btn.populated {
+    color: #a9b1d6;
+    border-color: #292e42;
+    background-color: rgba(36, 40, 59, 0.8);
+}
+
+.komorebi-workspaces .ws-btn.active {
+    background-color: #7aa2f7;
+    color: #1a1b26;
+    border: 1px solid #7aa2f7;
+    font-weight: bold;
+}
+
+.komorebi-workspaces .ws-layer-btn {
+    background-color: rgba(22, 22, 30, 0.8);
+    color: #bb9af7;
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 2px 8px;
+    margin: 2px 4px 2px 2px;
+    font-size: 11px;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.komorebi-workspaces .ws-layer-btn:hover {
+    background-color: #24283b;
+    border-color: #bb9af7;
+}
+
+/* Active Window Title Widget */
+.active-window {
+    background-color: rgba(22, 22, 30, 0.8);
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 2px 12px;
+    color: #a9b1d6;
+    max-width: 380px;
+}
+
+.active-window:hover {
+    border-color: #7aa2f7;
+    color: #c0caf5;
+}
+
+.active-window .window-icon {
+    margin-right: 6px;
+}
+
+/* Media Widget */
+.media {
+    background-color: rgba(36, 40, 59, 0.8);
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 2px 12px;
+    color: #c0caf5;
+}
+
+.media:hover,
+.memory:hover {
+    border-color: #bb9af7;
+}
+
+.media span,
+.memory span {
+    color: #bb9af7;
+}
+
+.media-menu,
+.calendar,
+.audio-menu,
+.systray-popup,
+.power-menu-popup {
+    background-color: #1a1b26;
+    border: 1px solid #7aa2f7;
+    border-radius: 8px;
+    padding: 10px;
+    color: #c0caf5;
+}
+
+/* Clock & Calendar Widget */
+.clock {
+    background-color: rgba(22, 22, 30, 0.8);
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 2px 12px;
+    font-weight: 600;
+}
+
+.clock:hover,
+.volume:hover {
+    border-color: #7dcfff;
+}
+
+.clock span,
+.volume span {
+    color: #7dcfff;
+}
+
+.calendar {
+    padding: 8px;
+}
+
+.calendar .calendar-header {
+    color: #7aa2f7;
+    font-weight: bold;
+    padding-bottom: 6px;
+}
+
+.calendar .calendar-day:hover {
+    background-color: #24283b;
+    border-radius: 4px;
+}
+
+.calendar .calendar-day.selected {
+    background-color: #7aa2f7;
+    color: #1a1b26;
+    border-radius: 4px;
+}
+
+/* Telemetry Widgets */
+.cpu:hover,
+.systray:hover,
+.custom-widget:hover {
+    border-color: #7aa2f7;
+}
+
+.cpu span,
+.custom-widget span {
+    color: #7aa2f7;
+}
+
+.cpu.medium,
+.memory.medium {
+    border-color: #e0af68;
+}
+
+.cpu.medium span,
+.memory.medium span {
+    color: #e0af68;
+}
+
+.cpu.high,
+.memory.high {
+    border-color: #f7768e;
+}
+
+.cpu.high span,
+.memory.high span {
+    color: #f7768e;
+}
+
+.traffic {
+    background-color: rgba(22, 22, 30, 0.8);
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 2px 10px;
+    font-size: 11px;
+}
+
+.traffic:hover {
+    border-color: #9ece6a;
+}
+
+.traffic span {
+    color: #9ece6a;
+}
+
+/* Audio Volume Widget */
+.volume.muted {
+    color: #565f89;
+}
+
+.volume.muted span {
+    color: #f7768e;
+}
+
+/* Systray Widget */
+.systray {
+    background-color: rgba(22, 22, 30, 0.8);
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 2px 8px;
+    margin: 2px 3px;
+}
+
+.systray .tray-icon {
+    padding: 0 3px;
+    margin: 0 1px;
+}
+
+.systray .toggle-btn {
+    color: #565f89;
+    padding: 0 3px;
+    font-size: 11px;
+}
+
+.systray .toggle-btn:hover {
+    color: #7aa2f7;
+}
+
+.systray-popup {
+    padding: 8px;
+}
+
+/* Power Menu Widget */
+.power-menu {
+    background-color: rgba(22, 22, 30, 0.8);
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 2px 10px;
+    margin: 2px 3px;
+    color: #f7768e;
+    font-size: 16px;
+}
+
+.power-menu:hover {
+    background-color: #f7768e;
+    color: #1a1b26;
+    border-color: #f7768e;
+}
+
+.power-menu-popup {
+    padding: 14px;
+}
+
+.power-menu-popup .power-btn {
+    background-color: #24283b;
+    color: #c0caf5;
+    border: 1px solid #292e42;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin: 4px;
+    font-size: 13px;
+}
+
+.power-menu-popup .power-btn:hover {
+    background-color: #7aa2f7;
+    color: #1a1b26;
+    border-color: #7aa2f7;
+}

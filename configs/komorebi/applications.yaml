@@ -1,0 +1,252 @@
+# Komorebi Application Rules & Window Override Definitions
+# applications.yaml - Window management rules, float exceptions, and tiling overrides
+# Schema compatible with Komorebi applications configuration format
+#
+# Reload Instructions:
+#   komorebic reload-configuration
+
+# Shell Enhancements & Desktop Utilities (Floating Overrides)
+- name: Flow Launcher
+  identifier:
+    kind: Exe
+    id: Flow.Launcher.exe
+    matching_strategy: Equals
+  float: true
+
+- name: EarTrumpet Audio Control
+  identifier:
+    kind: Exe
+    id: EarTrumpet.exe
+    matching_strategy: Equals
+  float: true
+
+- name: Windhawk Process Engine & UI
+  identifier:
+    kind: Exe
+    id: WindhawkUI.exe
+    matching_strategy: Equals
+  float: true
+
+- name: 1Password Quick Access & Unlock
+  identifier:
+    kind: Exe
+    id: 1Password.exe
+    matching_strategy: Equals
+  float: true
+
+- name: Bitwarden Password Manager
+  identifier:
+    kind: Exe
+    id: Bitwarden.exe
+    matching_strategy: Equals
+  float: true
+
+# System Tools & Windows Accessories (Floating Overrides)
+- name: Windows Task Manager
+  identifier:
+    kind: Exe
+    id: Taskmgr.exe
+    matching_strategy: Equals
+  float: true
+
+- name: Windows Calculator Modern
+  identifier:
+    kind: Exe
+    id: CalculatorApp.exe
+    matching_strategy: Equals
+  float: true
+
+- name: Windows Calculator Classic
+  identifier:
+    kind: Exe
+    id: calc.exe
+    matching_strategy: Equals
+  float: true
+
+- name: Windows Snipping Tool Overlay
+  identifier:
+    kind: Exe
+    id: SnippingTool.exe
+    matching_strategy: Equals
+  float: true
+
+- name: Screen Clipping Host
+  identifier:
+    kind: Exe
+    id: ScreenClippingHost.exe
+    matching_strategy: Equals
+  float: true
+
+# PowerToys Utilities (Floating Overrides)
+- name: PowerToys Launcher
+  identifier:
+    kind: Exe
+    id: PowerToys.PowerLauncher.exe
+    matching_strategy: Equals
+  float: true
+
+- name: PowerToys Color Picker
+  identifier:
+    kind: Exe
+    id: PowerToys.ColorPickerUI.exe
+    matching_strategy: Equals
+  float: true
+
+- name: PowerToys FancyZones Editor
+  identifier:
+    kind: Exe
+    id: PowerToys.FancyZonesEditor.exe
+    matching_strategy: Equals
+  float: true
+
+# Windows Management & Administrative Consoles (Floating Overrides)
+- name: Registry Editor
+  identifier:
+    kind: Exe
+    id: regedit.exe
+    matching_strategy: Equals
+  float: true
+
+- name: System Configuration
+  identifier:
+    kind: Exe
+    id: msconfig.exe
+    matching_strategy: Equals
+  float: true
+
+- name: Management Console
+  identifier:
+    kind: Exe
+    id: mmc.exe
+    matching_strategy: Equals
+  float: true
+
+- name: DirectX Diagnostic Tool
+  identifier:
+    kind: Exe
+    id: dxdiag.exe
+    matching_strategy: Equals
+  float: true
+
+- name: Volume Mixer / Control
+  identifier:
+    kind: Exe
+    id: SndVol.exe
+    matching_strategy: Equals
+  float: true
+
+- name: QuickLook File Previewer
+  identifier:
+    kind: Exe
+    id: QuickLook.exe
+    matching_strategy: Equals
+  float: true
+
+- name: YASB Status Bar
+  identifier:
+    kind: Exe
+    id: yasb.exe
+    matching_strategy: Equals
+  float: true
+
+# Generic Win32 Dialogs & Popups (Window Class Floating Overrides)
+- name: Standard Win32 Dialog Box
+  identifier:
+    kind: Class
+    id: "#32770"
+    matching_strategy: Equals
+  float: true
+
+- name: Modern Credential Dialog
+  identifier:
+    kind: Class
+    id: "Credential Dialog Xaml Host"
+    matching_strategy: Equals
+  float: true
+
+- name: Java AWT Dialog Box
+  identifier:
+    kind: Class
+    id: SunAwtDialog
+    matching_strategy: Equals
+  float: true
+
+# Picture-in-Picture Overlays (Window Title Floating Overrides)
+- name: Picture-in-Picture Video (Generic)
+  identifier:
+    kind: Title
+    id: Picture-in-Picture
+    matching_strategy: Contains
+  float: true
+
+- name: Picture in Picture Video (Generic Alternative)
+  identifier:
+    kind: Title
+    id: Picture in Picture
+    matching_strategy: Contains
+  float: true
+
+# Standard Tiling Applications (Explicit Tiling Rules)
+
+- name: Visual Studio Code
+  identifier:
+    kind: Exe
+    id: Code.exe
+    matching_strategy: Equals
+  float: false
+
+- name: Windows Terminal
+  identifier:
+    kind: Exe
+    id: WindowsTerminal.exe
+    matching_strategy: Equals
+  float: false
+
+- name: Mozilla Firefox
+  identifier:
+    kind: Exe
+    id: firefox.exe
+    matching_strategy: Equals
+  float: false
+
+- name: Google Chrome
+  identifier:
+    kind: Exe
+    id: chrome.exe
+    matching_strategy: Equals
+  float: false
+
+- name: Microsoft Edge
+  identifier:
+    kind: Exe
+    id: msedge.exe
+    matching_strategy: Equals
+  float: false
+
+- name: Discord
+  identifier:
+    kind: Exe
+    id: Discord.exe
+    matching_strategy: Equals
+  float: false
+
+- name: Slack
+  identifier:
+    kind: Exe
+    id: Slack.exe
+    matching_strategy: Equals
+  float: false
+
+- name: Obsidian
+  identifier:
+    kind: Exe
+    id: Obsidian.exe
+    matching_strategy: Equals
+  float: false
+
+- name: Spotify Desktop
+  identifier:
+    kind: Exe
+    id: Spotify.exe
+    matching_strategy: Equals
+  float: false

@@ -1,0 +1,226 @@
+{
+  "$schema": "./themes/performance.schema.json",
+  "active_profile": "balanced",
+  "profiles": {
+    "ultra-low": {
+      "komorebi": {
+        "animation_enabled": false,
+        "animation_duration_ms": 0,
+        "animation_fps": 0,
+        "border_enabled": false,
+        "border_width": 0,
+        "border_offset": 0,
+        "border_style": "system",
+        "border_implementation": "Windows",
+        "unmanaged_window_operation_behaviour": "NoOp",
+        "transparency_enabled": false,
+        "window_hiding_behaviour": "Hide"
+      },
+      "yasb": {
+        "blur_enabled": false,
+        "acrylic_enabled": false,
+        "round_corners": false,
+        "animation_duration_ms": 0,
+        "cpu_interval_ms": 10000,
+        "memory_interval_ms": 15000,
+        "traffic_interval_ms": 10000,
+        "media_interval_ms": 5000,
+        "clock_interval_ms": 10000,
+        "gpu_interval_ms": 30000
+      },
+      "dwm": {
+        "backdrop_type": 1,
+        "force_dark_mode": true,
+        "rounded_corners": 1,
+        "reduce_motion": true,
+        "taskbar_autohide_enabled": false
+      },
+      "launcher": {
+        "use_animation": false,
+        "animation_speed": "Fast",
+        "search_window_effect": "None",
+        "shadow_effect": false,
+        "max_results": 5,
+        "plugin_cache_max": 50
+      },
+      "flyout": {
+        "backdrop": "None",
+        "animate_show": false,
+        "animate_hide": false,
+        "animation_duration_ms": 0,
+        "timeout_ms": 2000
+      },
+      "os": {
+        "background_eco_qos": true,
+        "komorebi_priority": "Normal",
+        "yasb_priority": "BelowNormal",
+        "disable_windows_animations": true
+      }
+    },
+    "balanced": {
+      "komorebi": {
+        "animation_enabled": true,
+        "animation_duration_ms": 150,
+        "animation_fps": 60,
+        "border_enabled": true,
+        "border_width": 2,
+        "border_offset": 0,
+        "border_style": "rounded",
+        "border_implementation": "Komorebi",
+        "unmanaged_window_operation_behaviour": "Op",
+        "transparency_enabled": false,
+        "window_hiding_behaviour": "Cloak"
+      },
+      "yasb": {
+        "blur_enabled": true,
+        "acrylic_enabled": false,
+        "round_corners": true,
+        "animation_duration_ms": 150,
+        "cpu_interval_ms": 2000,
+        "memory_interval_ms": 3000,
+        "traffic_interval_ms": 2000,
+        "media_interval_ms": 1000,
+        "clock_interval_ms": 1000,
+        "gpu_interval_ms": 5000
+      },
+      "dwm": {
+        "backdrop_type": 2,
+        "force_dark_mode": true,
+        "rounded_corners": 2,
+        "reduce_motion": false,
+        "taskbar_autohide_enabled": false
+      },
+      "launcher": {
+        "use_animation": true,
+        "animation_speed": "Fast",
+        "search_window_effect": "Mica",
+        "shadow_effect": true,
+        "max_results": 8,
+        "plugin_cache_max": 100
+      },
+      "flyout": {
+        "backdrop": "MicaAlt",
+        "animate_show": true,
+        "animate_hide": true,
+        "animation_duration_ms": 150,
+        "timeout_ms": 3000
+      },
+      "os": {
+        "background_eco_qos": false,
+        "komorebi_priority": "Normal",
+        "yasb_priority": "Normal",
+        "disable_windows_animations": false
+      }
+    },
+    "visual-rich": {
+      "komorebi": {
+        "animation_enabled": true,
+        "animation_duration_ms": 250,
+        "animation_fps": 120,
+        "border_enabled": true,
+        "border_width": 3,
+        "border_offset": 0,
+        "border_style": "rounded",
+        "border_implementation": "Komorebi",
+        "unmanaged_window_operation_behaviour": "Op",
+        "transparency_enabled": true,
+        "window_hiding_behaviour": "Cloak"
+      },
+      "yasb": {
+        "blur_enabled": true,
+        "acrylic_enabled": true,
+        "round_corners": true,
+        "animation_duration_ms": 250,
+        "cpu_interval_ms": 1000,
+        "memory_interval_ms": 2000,
+        "traffic_interval_ms": 1000,
+        "media_interval_ms": 500,
+        "clock_interval_ms": 1000,
+        "gpu_interval_ms": 2000
+      },
+      "dwm": {
+        "backdrop_type": 3,
+        "force_dark_mode": true,
+        "rounded_corners": 2,
+        "reduce_motion": false,
+        "taskbar_autohide_enabled": false
+      },
+      "launcher": {
+        "use_animation": true,
+        "animation_speed": "Medium",
+        "search_window_effect": "Acrylic",
+        "shadow_effect": true,
+        "max_results": 10,
+        "plugin_cache_max": 250
+      },
+      "flyout": {
+        "backdrop": "Acrylic",
+        "animate_show": true,
+        "animate_hide": true,
+        "animation_duration_ms": 250,
+        "timeout_ms": 4000
+      },
+      "os": {
+        "background_eco_qos": false,
+        "komorebi_priority": "Normal",
+        "yasb_priority": "Normal",
+        "disable_windows_animations": false
+      }
+    },
+    "gaming": {
+      "komorebi": {
+        "animation_enabled": false,
+        "animation_duration_ms": 0,
+        "animation_fps": 0,
+        "border_enabled": false,
+        "border_width": 0,
+        "border_offset": 0,
+        "border_style": "system",
+        "border_implementation": "Windows",
+        "unmanaged_window_operation_behaviour": "NoOp",
+        "transparency_enabled": false,
+        "window_hiding_behaviour": "Minimize"
+      },
+      "yasb": {
+        "blur_enabled": false,
+        "acrylic_enabled": false,
+        "round_corners": false,
+        "animation_duration_ms": 0,
+        "cpu_interval_ms": 30000,
+        "memory_interval_ms": 30000,
+        "traffic_interval_ms": 30000,
+        "media_interval_ms": 10000,
+        "clock_interval_ms": 5000,
+        "gpu_interval_ms": 60000
+      },
+      "dwm": {
+        "backdrop_type": 1,
+        "force_dark_mode": true,
+        "rounded_corners": 1,
+        "reduce_motion": true,
+        "taskbar_autohide_enabled": false
+      },
+      "launcher": {
+        "use_animation": false,
+        "animation_speed": "Fast",
+        "search_window_effect": "None",
+        "shadow_effect": false,
+        "max_results": 4,
+        "plugin_cache_max": 20
+      },
+      "flyout": {
+        "backdrop": "None",
+        "animate_show": false,
+        "animate_hide": false,
+        "animation_duration_ms": 0,
+        "timeout_ms": 1500
+      },
+      "os": {
+        "background_eco_qos": false,
+        "komorebi_priority": "AboveNormal",
+        "yasb_priority": "Idle",
+        "disable_windows_animations": true
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+/* ==============================================================================
+ * komoyasb UI Global Design System & Tailwind CSS Directives
+ * Configures Tailwind foundation layers, CSS design tokens, and custom scrollbars
+ *
+ * Design Tokens:
+ *   - Colors: --color-bg-primary, --color-bg-secondary, --color-bg-surface,
+ *             --color-fg-primary, --color-fg-secondary, --color-fg-muted,
+ *             --color-accent, --color-accent-secondary, --color-border-active,
+ *             --color-border-inactive, --color-error, --color-warning,
+ *             --color-success, --color-info
+ *   - Geometry: --radius
+ *
+ * Reload Instructions:
+ *   Compiled via Vite/Tailwind build pipeline: npm --prefix ui run build
+ * ============================================================================== */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg-primary: #0f141c;
+  --color-bg-secondary: #1a202c;
+  --color-bg-surface: #232b3b;
+  --color-fg-primary: #f8fafc;
+  --color-fg-secondary: #cbd5e1;
+  --color-fg-muted: #64748b;
+  --color-accent: #38bdf8;
+  --color-accent-secondary: #818cf8;
+  --color-border-active: #38bdf8;
+  --color-border-inactive: #334155;
+  --color-error: #f43f5e;
+  --color-warning: #f59e0b;
+  --color-success: #10b981;
+  --color-info: #0ea5e9;
+  --radius: 8px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  font-family: 'Segoe UI Variable Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--color-bg-primary);
+  color: var(--color-fg-primary);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-inactive);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-fg-muted);
+}

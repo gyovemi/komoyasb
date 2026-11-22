@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "KomoyasbPerformanceConfig",
+  "type": "object",
+  "required": ["active_profile", "profiles"],
+  "properties": {
+    "active_profile": {
+      "type": "string",
+      "enum": ["ultra-low", "balanced", "visual-rich", "gaming", "custom"]
+    },
+    "profiles": {
+      "type": "object",
+      "required": ["ultra-low", "balanced", "visual-rich", "gaming"],
+      "properties": {
+        "ultra-low": { "$ref": "#/definitions/ProfileDefinition" },
+        "balanced": { "$ref": "#/definitions/ProfileDefinition" },
+        "visual-rich": { "$ref": "#/definitions/ProfileDefinition" },
+        "gaming": { "$ref": "#/definitions/ProfileDefinition" },
+        "custom": { "$ref": "#/definitions/ProfileDefinition" }
+      }
+    }
+  },
+  "definitions": {
+    "ProfileDefinition": {
+      "type": "object",
+      "required": ["komorebi", "yasb", "dwm", "launcher", "flyout", "os"],
+      "properties": {
+        "komorebi": {
+          "type": "object",
+          "required": [
+            "animation_enabled",
+            "animation_duration_ms",
+            "animation_fps",
+            "border_enabled",
+            "border_width",
+            "border_offset",
+            "border_style",
+            "border_implementation",
+            "unmanaged_window_operation_behaviour",
+            "transparency_enabled",
+            "window_hiding_behaviour"
+          ],
+          "properties": {
+            "animation_enabled": { "type": "boolean" },
+            "animation_duration_ms": { "type": "integer", "minimum": 0, "maximum": 1000 },
+            "animation_fps": { "type": "integer", "minimum": 0, "maximum": 240 },
+            "border_enabled": { "type": "boolean" },
+            "border_width": { "type": "integer", "minimum": 0, "maximum": 16 },
+            "border_offset": { "type": "integer", "minimum": -5, "maximum": 5 },
+            "border_style": { "type": "string", "enum": ["rounded", "square", "system"] },
+            "border_implementation": { "type": "string", "enum": ["Komorebi", "Windows"] },
+            "unmanaged_window_operation_behaviour": { "type": "string", "enum": ["Op", "NoOp"] },
+            "transparency_enabled": { "type": "boolean" },
+            "window_hiding_behaviour": { "type": "string", "enum": ["Cloak", "Hide", "Minimize"] }
+          }
+        },
+        "yasb": {
+          "type": "object",
+          "required": [
+            "blur_enabled",
+            "acrylic_enabled",
+            "round_corners",
+            "animation_duration_ms",
+            "cpu_interval_ms",
+            "memory_interval_ms",
+            "traffic_interval_ms",
+            "media_interval_ms",
+            "clock_interval_ms",
+            "gpu_interval_ms"
+          ],
+          "properties": {
+            "blur_enabled": { "type": "boolean" },
+            "acrylic_enabled": { "type": "boolean" },
+            "round_corners": { "type": "boolean" },
+            "animation_duration_ms": { "type": "integer", "minimum": 0, "maximum": 1000 },
+            "cpu_interval_ms": { "type": "integer", "minimum": 500, "maximum": 60000 },
+            "memory_interval_ms": { "type": "integer", "minimum": 500, "maximum": 60000 },
+            "traffic_interval_ms": { "type": "integer", "minimum": 500, "maximum": 60000 },
+            "media_interval_ms": { "type": "integer", "minimum": 200, "maximum": 30000 },
+            "clock_interval_ms": { "type": "integer", "minimum": 1000, "maximum": 60000 },
+            "gpu_interval_ms": { "type": "integer", "minimum": 1000, "maximum": 60000 }
+          }
+        },
+        "dwm": {
+          "type": "object",
+          "required": [
+            "backdrop_type",
+            "force_dark_mode",
+            "rounded_corners",
+            "reduce_motion",
+            "taskbar_autohide_enabled"
+          ],
+          "properties": {
+            "backdrop_type": { "type": "integer", "enum": [1, 2, 3, 4], "description": "1=None, 2=Mica, 3=Acrylic, 4=MicaAlt" },
+            "force_dark_mode": { "type": "boolean" },
+            "rounded_corners": { "type": "integer", "enum": [1, 2, 3], "description": "1=Rectangular, 2=Rounded, 3=SmallRounded" },
+            "reduce_motion": { "type": "boolean" },
+            "taskbar_autohide_enabled": { "type": "boolean" }
+          }
+        },
+        "launcher": {
+          "type": "object",
+          "required": [
+            "use_animation",
+            "animation_speed",
+            "search_window_effect",
+            "shadow_effect",
+            "max_results",
+            "plugin_cache_max"
+          ],
+          "properties": {
+            "use_animation": { "type": "boolean" },
+            "animation_speed": { "type": "string", "enum": ["Slow", "Medium", "Fast"] },
+            "search_window_effect": { "type": "string", "enum": ["None", "Blur", "Acrylic", "Mica"] },
+            "shadow_effect": { "type": "boolean" },
+            "max_results": { "type": "integer", "minimum": 3, "maximum": 15 },
+            "plugin_cache_max": { "type": "integer", "minimum": 10, "maximum": 1000 }
+          }
+        },
+        "flyout": {
+          "type": "object",
+          "required": [
+            "backdrop",
+            "animate_show",
+            "animate_hide",
+            "animation_duration_ms",
+            "timeout_ms"
+          ],
+          "properties": {
+            "backdrop": { "type": "string", "enum": ["None", "Mica", "Acrylic", "MicaAlt"] },
+            "animate_show": { "type": "boolean" },
+            "animate_hide": { "type": "boolean" },
+            "animation_duration_ms": { "type": "integer", "minimum": 0, "maximum": 500 },
+            "timeout_ms": { "type": "integer", "minimum": 1000, "maximum": 10000 }
+          }
+        },
+        "os": {
+          "type": "object",
+          "required": [
+            "background_eco_qos",
+            "komorebi_priority",
+            "yasb_priority",
+            "disable_windows_animations"
+          ],
+          "properties": {
+            "background_eco_qos": { "type": "boolean", "description": "Enable Win32 PROCESS_POWER_THROTTLING_EXECUTION_SPEED for helper tools" },
+            "komorebi_priority": { "type": "string", "enum": ["Normal", "AboveNormal", "High"] },
+            "yasb_priority": { "type": "string", "enum": ["Idle", "BelowNormal", "Normal"] },
+            "disable_windows_animations": { "type": "boolean", "description": "Toggle Windows SPI_SETCLIENTAREAANIMATION & MinAnimate" }
+          }
+        }
+      }
+    }
+  }
+}

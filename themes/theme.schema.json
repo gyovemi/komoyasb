@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UnifiedThemeSchema",
+  "type": "object",
+  "required": [
+    "name",
+    "variant",
+    "colors",
+    "typography",
+    "geometry",
+    "opacity",
+    "wallpaper"
+  ],
+  "properties": {
+    "name": { "type": "string" },
+    "variant": { "type": "string", "enum": ["dark", "light"] },
+    "colors": {
+      "type": "object",
+      "required": [
+        "bg_primary",
+        "bg_secondary",
+        "bg_surface",
+        "fg_primary",
+        "fg_secondary",
+        "fg_muted",
+        "accent",
+        "accent_secondary",
+        "border_active",
+        "border_inactive",
+        "error",
+        "warning",
+        "success",
+        "info"
+      ],
+      "properties": {
+        "bg_primary": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "bg_secondary": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "bg_surface": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "fg_primary": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "fg_secondary": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "fg_muted": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "accent": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "accent_secondary": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "border_active": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "border_inactive": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "error": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "warning": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "success": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "info": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" }
+      }
+    },
+    "typography": {
+      "type": "object",
+      "required": ["font_family", "font_size_sm", "font_size_md", "font_size_lg"],
+      "properties": {
+        "font_family": { "type": "string" },
+        "font_size_sm": { "type": "string" },
+        "font_size_md": { "type": "string" },
+        "font_size_lg": { "type": "string" }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "required": ["border_width", "border_radius", "window_gap", "bar_height"],
+      "properties": {
+        "border_width": { "type": "integer", "minimum": 0 },
+        "border_radius": { "type": "integer", "minimum": 0 },
+        "window_gap": { "type": "integer", "minimum": 0 },
+        "bar_height": { "type": "integer", "minimum": 20 }
+      }
+    },
+    "opacity": {
+      "type": "object",
+      "required": ["bar", "window_unfocused", "flyout", "launcher"],
+      "properties": {
+        "bar": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "window_unfocused": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "flyout": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+        "launcher": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+      }
+    },
+    "wallpaper": {
+      "type": "object",
+      "required": ["path", "style"],
+      "properties": {
+        "path": { "type": "string" },
+        "style": { "type": "string", "enum": ["Fill", "Fit", "Stretch", "Tile", "Center", "Span"] }
+      }
+    }
+  }
+}

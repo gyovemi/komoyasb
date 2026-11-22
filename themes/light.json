@@ -1,0 +1,42 @@
+{
+  "name": "Tokyo Night Light",
+  "variant": "light",
+  "colors": {
+    "bg_primary": "#e1e2e7",
+    "bg_secondary": "#d5d6db",
+    "bg_surface": "#cfc9c2",
+    "fg_primary": "#3760bf",
+    "fg_secondary": "#6172b0",
+    "fg_muted": "#8990b3",
+    "accent": "#2e7de9",
+    "accent_secondary": "#9854f1",
+    "border_active": "#2e7de9",
+    "border_inactive": "#c4c8da",
+    "error": "#f52a65",
+    "warning": "#8c6c3e",
+    "success": "#587539",
+    "info": "#007197"
+  },
+  "typography": {
+    "font_family": "JetBrainsMono Nerd Font",
+    "font_size_sm": "11px",
+    "font_size_md": "13px",
+    "font_size_lg": "16px"
+  },
+  "geometry": {
+    "border_width": 2,
+    "border_radius": 8,
+    "window_gap": 8,
+    "bar_height": 32
+  },
+  "opacity": {
+    "bar": 0.90,
+    "window_unfocused": 0.88,
+    "flyout": 0.92,
+    "launcher": 0.95
+  },
+  "wallpaper": {
+    "path": "configs/polish/wallpapers/light.png",
+    "style": "Fill"
+  }
+}

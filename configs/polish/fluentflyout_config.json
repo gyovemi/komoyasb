@@ -1,0 +1,69 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/fluent-flyout/fluentflyout/main/schema.json",
+  "General": {
+    "RunAtStartup": true,
+    "ShowTrayIcon": false,
+    "CheckForUpdates": false,
+    "Language": "en-US"
+  },
+  "Appearance": {
+    "Theme": "dark",
+    "Backdrop": "MicaAlt",
+    "AccentColor": "#7aa2f7",
+    "AccentSecondaryColor": "#bb9af7",
+    "BackgroundColor": "#1a1b26",
+    "SurfaceColor": "#24283b",
+    "ForegroundColor": "#c0caf5",
+    "ForegroundMutedColor": "#565f89",
+    "BorderColor": "#7aa2f7",
+    "BorderWidth": 2,
+    "CornerRadius": 8,
+    "FontFamily": "JetBrainsMono Nerd Font",
+    "FontSize": "13px",
+    "Opacity": 0.90
+  },
+  "Placement": {
+    "Alignment": "TopCenter",
+    "DisplayIndex": 0,
+    "OffsetX": 0,
+    "OffsetY": 32,
+    "Margin": 8,
+    "SafePaddingYASB": 32,
+    "KeepOnScreen": true,
+    "AvoidWorkAreaOverlap": true
+  },
+  "Behavior": {
+    "TimeoutMs": 3000,
+    "AnimateShow": true,
+    "AnimateHide": true,
+    "AnimationDurationMs": 150,
+    "DismissOnClick": true,
+    "EnableModernMediaControls": true
+  },
+  "Modules": {
+    "Volume": {
+      "Enabled": true,
+      "StepSize": 2,
+      "ShowMuteIndicator": true
+    },
+    "Brightness": {
+      "Enabled": true,
+      "StepSize": 5
+    },
+    "Media": {
+      "Enabled": true,
+      "ShowThumbnail": true,
+      "ShowPlaybackControls": true,
+      "ShowTimeline": true
+    },
+    "AirplaneMode": {
+      "Enabled": false
+    },
+    "LockKeys": {
+      "Enabled": true,
+      "ShowCapsLock": true,
+      "ShowNumLock": false,
+      "ShowScrollLock": false
+    }
+  }
+}

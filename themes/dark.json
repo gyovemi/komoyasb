@@ -1,0 +1,42 @@
+{
+  "name": "Tokyo Night Dark",
+  "variant": "dark",
+  "colors": {
+    "bg_primary": "#1a1b26",
+    "bg_secondary": "#16161e",
+    "bg_surface": "#24283b",
+    "fg_primary": "#c0caf5",
+    "fg_secondary": "#a9b1d6",
+    "fg_muted": "#565f89",
+    "accent": "#7aa2f7",
+    "accent_secondary": "#bb9af7",
+    "border_active": "#7aa2f7",
+    "border_inactive": "#292e42",
+    "error": "#f7768e",
+    "warning": "#e0af68",
+    "success": "#9ece6a",
+    "info": "#7dcfff"
+  },
+  "typography": {
+    "font_family": "JetBrainsMono Nerd Font",
+    "font_size_sm": "11px",
+    "font_size_md": "13px",
+    "font_size_lg": "16px"
+  },
+  "geometry": {
+    "border_width": 2,
+    "border_radius": 8,
+    "window_gap": 8,
+    "bar_height": 32
+  },
+  "opacity": {
+    "bar": 0.88,
+    "window_unfocused": 0.85,
+    "flyout": 0.90,
+    "launcher": 0.92
+  },
+  "wallpaper": {
+    "path": "configs/polish/wallpapers/dark.png",
+    "style": "Fill"
+  }
+}

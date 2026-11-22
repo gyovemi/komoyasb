@@ -1,0 +1,23 @@
+Windows Registry Editor Version 5.00
+
+; EarTrumpet settings and Windows Audio Tray configuration
+; Replaces standard system tray volume with EarTrumpet and tunes theme integration
+
+[HKEY_CURRENT_USER\Software\File-New-Project\EarTrumpet]
+"HasMigrated"=dword:00000001
+"UseAccentColor"=dword:00000001
+"Theme"="System"
+"FirstRun"=dword:00000000
+
+; EarTrumpet Flyout Behavior
+[HKEY_CURRENT_USER\Software\File-New-Project\EarTrumpet\Flyout]
+"ShowVolumePeakMeter"=dword:00000001
+"ShowPlaybackDevices"=dword:00000001
+"ShowRecordingDevices"=dword:00000000
+"ShowAppIcons"=dword:00000001
+"ExpandAll"=dword:00000000
+
+; Windows Notification Area: Configure EarTrumpet icon promotion
+[HKEY_CURRENT_USER\Control Panel\NotifyIconSettings\EarTrumpet]
+"IsPromoted"=dword:00000001
+

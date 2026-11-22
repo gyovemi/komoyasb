@@ -1,0 +1,323 @@
+/* YASB Reborn (v2.0.8+) Stylesheet Template */
+
+* {
+    font-family: "{{typography.font_family}}", "Segoe UI", sans-serif;
+    font-size: {{typography.font_size_md}};
+    color: {{colors.fg_primary}};
+    padding: 0;
+    margin: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+/* Root Status Bar Container */
+.yasb-bar {
+    background-color: {{colors.bg_primary_alpha85}};
+    border-bottom: {{geometry.border_width}}px solid {{colors.border_inactive}};
+    height: {{geometry.bar_height}}px;
+    min-height: {{geometry.bar_height}}px;
+    max-height: {{geometry.bar_height}}px;
+}
+
+/* Layout Containers */
+.container-left,
+.container-center,
+.container-right {
+    padding: 2px 4px;
+}
+
+/* Base Widget Pill Design */
+.widget,
+.cpu,
+.memory,
+.volume,
+.custom-widget {
+    background-color: {{colors.bg_secondary_alpha80}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 2px 10px;
+    margin: 2px 3px;
+    color: {{colors.fg_primary}};
+    font-size: {{typography.font_size_md}};
+    transition: background-color {{perf.yasb.transition_duration}}, border-color {{perf.yasb.transition_duration}}, color {{perf.yasb.transition_duration}};
+}
+
+.widget:hover {
+    background-color: {{colors.bg_surface}};
+    border: 1px solid {{colors.accent_secondary}};
+}
+
+.widget span {
+    color: {{colors.accent}};
+    font-size: {{typography.font_size_md}};
+    margin-right: 5px;
+}
+
+/* Komorebi Workspaces Widget */
+.komorebi-workspaces {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    margin: 0 4px 0 0;
+}
+
+.komorebi-workspaces .ws-btn {
+    background-color: {{colors.bg_secondary_alpha80}};
+    color: {{colors.fg_muted}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 2px 9px;
+    margin: 2px 2px;
+    min-width: 20px;
+    min-height: 20px;
+    font-weight: 500;
+    transition: background-color {{perf.yasb.transition_duration}}, color {{perf.yasb.transition_duration}}, border-color {{perf.yasb.transition_duration}};
+}
+
+.komorebi-workspaces .ws-btn:hover {
+    background-color: {{colors.bg_surface}};
+    color: {{colors.fg_primary}};
+    border-color: {{colors.accent}};
+}
+
+.komorebi-workspaces .ws-btn.populated {
+    color: {{colors.fg_secondary}};
+    border-color: {{colors.border_inactive}};
+    background-color: {{colors.bg_surface_alpha80}};
+}
+
+.komorebi-workspaces .ws-btn.active {
+    background-color: {{colors.accent}};
+    color: {{colors.bg_primary}};
+    border: 1px solid {{colors.border_active}};
+    font-weight: bold;
+}
+
+.komorebi-workspaces .ws-layer-btn {
+    background-color: {{colors.bg_secondary_alpha80}};
+    color: {{colors.accent_secondary}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 2px 8px;
+    margin: 2px 4px 2px 2px;
+    font-size: {{typography.font_size_sm}};
+    transition: background-color {{perf.yasb.transition_duration}}, border-color {{perf.yasb.transition_duration}};
+}
+
+.komorebi-workspaces .ws-layer-btn:hover {
+    background-color: {{colors.bg_surface}};
+    border-color: {{colors.accent_secondary}};
+}
+
+/* Active Window Title Widget */
+.active-window {
+    background-color: {{colors.bg_secondary_alpha80}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 2px 12px;
+    color: {{colors.fg_secondary}};
+    max-width: 380px;
+}
+
+.active-window:hover {
+    border-color: {{colors.accent}};
+    color: {{colors.fg_primary}};
+}
+
+.active-window .window-icon {
+    margin-right: 6px;
+}
+
+/* Media Widget */
+.media {
+    background-color: {{colors.bg_surface_alpha80}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 2px 12px;
+    color: {{colors.fg_primary}};
+}
+
+.media:hover,
+.memory:hover {
+    border-color: {{colors.accent_secondary}};
+}
+
+.media span,
+.memory span {
+    color: {{colors.accent_secondary}};
+}
+
+.media-menu,
+.calendar,
+.audio-menu,
+.systray-popup,
+.power-menu-popup {
+    background-color: {{colors.bg_primary}};
+    border: 1px solid {{colors.border_active}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 10px;
+    color: {{colors.fg_primary}};
+}
+
+/* Clock & Calendar Widget */
+.clock {
+    background-color: {{colors.bg_secondary_alpha80}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 2px 12px;
+    font-weight: 600;
+}
+
+.clock:hover,
+.volume:hover {
+    border-color: {{colors.info}};
+}
+
+.clock span,
+.volume span {
+    color: {{colors.info}};
+}
+
+.calendar {
+    padding: 8px;
+}
+
+.calendar .calendar-header {
+    color: {{colors.accent}};
+    font-weight: bold;
+    padding-bottom: 6px;
+}
+
+.calendar .calendar-day:hover {
+    background-color: {{colors.bg_surface}};
+    border-radius: 4px;
+}
+
+.calendar .calendar-day.selected {
+    background-color: {{colors.accent}};
+    color: {{colors.bg_primary}};
+    border-radius: 4px;
+}
+
+/* Telemetry Widgets */
+.cpu:hover,
+.systray:hover,
+.custom-widget:hover {
+    border-color: {{colors.accent}};
+}
+
+.cpu span,
+.custom-widget span {
+    color: {{colors.accent}};
+}
+
+.cpu.medium,
+.memory.medium {
+    border-color: {{colors.warning}};
+}
+
+.cpu.medium span,
+.memory.medium span {
+    color: {{colors.warning}};
+}
+
+.cpu.high,
+.memory.high {
+    border-color: {{colors.error}};
+}
+
+.cpu.high span,
+.memory.high span {
+    color: {{colors.error}};
+}
+
+.traffic {
+    background-color: {{colors.bg_secondary_alpha80}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 2px 10px;
+    font-size: {{typography.font_size_sm}};
+}
+
+.traffic:hover {
+    border-color: {{colors.success}};
+}
+
+.traffic span {
+    color: {{colors.success}};
+}
+
+/* Audio Volume Widget */
+.volume.muted {
+    color: {{colors.fg_muted}};
+}
+
+.volume.muted span {
+    color: {{colors.error}};
+}
+
+/* Systray Widget */
+.systray {
+    background-color: {{colors.bg_secondary_alpha80}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 2px 8px;
+    margin: 2px 3px;
+}
+
+.systray .tray-icon {
+    padding: 0 3px;
+    margin: 0 1px;
+}
+
+.systray .toggle-btn {
+    color: {{colors.fg_muted}};
+    padding: 0 3px;
+    font-size: {{typography.font_size_sm}};
+}
+
+.systray .toggle-btn:hover {
+    color: {{colors.accent}};
+}
+
+.systray-popup {
+    padding: 8px;
+}
+
+/* Power Menu Widget */
+.power-menu {
+    background-color: {{colors.bg_secondary_alpha80}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 2px 10px;
+    margin: 2px 3px;
+    color: {{colors.error}};
+    font-size: {{typography.font_size_lg}};
+}
+
+.power-menu:hover {
+    background-color: {{colors.error}};
+    color: {{colors.bg_primary}};
+    border-color: {{colors.error}};
+}
+
+.power-menu-popup {
+    padding: 14px;
+}
+
+.power-menu-popup .power-btn {
+    background-color: {{colors.bg_surface}};
+    color: {{colors.fg_primary}};
+    border: 1px solid {{colors.border_inactive}};
+    border-radius: {{geometry.border_radius}}px;
+    padding: 8px 16px;
+    margin: 4px;
+    font-size: {{typography.font_size_md}};
+}
+
+.power-menu-popup .power-btn:hover {
+    background-color: {{colors.accent}};
+    color: {{colors.bg_primary}};
+    border-color: {{colors.border_active}};
+}

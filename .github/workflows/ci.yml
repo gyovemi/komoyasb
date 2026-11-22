@@ -1,0 +1,134 @@
+name: CI Quality Gates
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  powershell-quality-and-safety:
+    name: PowerShell Quality & Host Safety Gates
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Pester 5.5+
+        shell: pwsh
+        run: |
+          Install-Module -Name Pester -MinimumVersion 5.5.0 -Force -SkipPublisherCheck -Scope CurrentUser
+
+      - name: Run AST Host-Safety Verification Gate
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\tests\verify-host-safety.ps1
+
+      - name: Run Security & Rootless Mode Gate
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-SecurityAndRootless.ps1
+
+      - name: Run PowerShell Pester Test Suite
+        shell: pwsh
+        run: |
+          $config = [PesterConfiguration]::Default
+          $config.Run.Path = './tests/powershell'
+          $config.Run.PassThru = $true
+          $config.Output.Verbosity = 'Detailed'
+          $res = Invoke-Pester -Configuration $config
+          if ($res.FailedCount -gt 0) {
+            Write-Error "Pester test failure: $($res.FailedCount) failed test(s)."
+            exit 1
+          }
+
+  frontend-quality:
+    name: Frontend Quality & Vitest Coverage Gates
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: 'ui/pnpm-lock.yaml'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript Compilation & Vite Build
+        run: pnpm run build
+
+      - name: Vitest Unit Tests & V8 Coverage
+        run: pnpm run test:coverage
+
+  rust-tauri-quality:
+    name: Rust / Tauri Quality Gates
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ui/src-tauri
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cargo Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            ui/src-tauri/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('ui/src-tauri/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Rustfmt Check
+        run: cargo fmt --all -- --check
+
+      - name: Clippy Static Linting
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Cargo Backend Tests
+        run: cargo test --all-features
+
+  dry-run-matrix:
+    name: Full Dry-Run Matrix (${{ matrix.mode }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [ standard, no-admin ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Full Dry-Run Harness (${{ matrix.mode }})
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-FullDryRun.ps1

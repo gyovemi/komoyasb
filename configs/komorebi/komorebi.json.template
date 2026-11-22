@@ -1,0 +1,433 @@
+{
+  "$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.33/schema.json",
+  "app_specific_configuration_path": "$USERPROFILE/.config/komorebi/applications.yaml",
+  "cross_monitor_move_behaviour": "Insert",
+  "default_workspace_padding": {{geometry.window_gap}},
+  "default_container_padding": {{geometry.window_gap}},
+  "animation": {
+    "enabled": {{perf.komorebi.animation_enabled}},
+    "duration": {{perf.komorebi.animation_duration_ms}},
+    "fps": {{perf.komorebi.animation_fps}},
+    "style": "Linear"
+  },
+  "border": {{perf.komorebi.border_enabled}},
+  "border_width": {{perf.komorebi.border_width}},
+  "border_offset": {{perf.komorebi.border_offset}},
+  "border_style": "{{perf.komorebi.border_style}}",
+  "border_implementation": "{{perf.komorebi.border_implementation}}",
+  "border_colours": {
+    "single": "{{colors.border_active}}",
+    "stack": "{{colors.accent_secondary}}",
+    "monocle": "{{colors.accent}}",
+    "unfocused": "{{colors.border_inactive}}",
+    "floating": "{{colors.accent_secondary}}"
+  },
+  "unmanaged_window_operation_behaviour": "{{perf.komorebi.unmanaged_window_operation_behaviour}}",
+  "mouse_follows_focus": false,
+  "focus_follows_mouse": "Komorebi",
+  "transparency": {{perf.komorebi.transparency_enabled}},
+  "transparency_alpha": {{opacity.window_unfocused}},
+  "window_hiding_behaviour": "{{perf.komorebi.window_hiding_behaviour}}",
+  "workspaces_per_monitor": true,
+  "monitors": [
+    {
+      "workspaces": [
+        {
+          "name": "1:dev",
+          "layout": "BSP"
+        },
+        {
+          "name": "2:web",
+          "layout": "BSP"
+        },
+        {
+          "name": "3:chat",
+          "layout": "Columns"
+        },
+        {
+          "name": "4:code",
+          "layout": "BSP"
+        },
+        {
+          "name": "5:media",
+          "layout": "BSP"
+        },
+        {
+          "name": "6:docs",
+          "layout": "BSP"
+        },
+        {
+          "name": "7:sys",
+          "layout": "BSP"
+        },
+        {
+          "name": "8:misc",
+          "layout": "BSP"
+        },
+        {
+          "name": "9:float",
+          "layout": "Floating"
+        }
+      ]
+    },
+    {
+      "workspaces": [
+        {
+          "name": "10:sec1",
+          "layout": "BSP"
+        },
+        {
+          "name": "11:sec2",
+          "layout": "BSP"
+        },
+        {
+          "name": "12:sec3",
+          "layout": "Columns"
+        },
+        {
+          "name": "13:sec4",
+          "layout": "BSP"
+        }
+      ]
+    }
+  ],
+  "float_rules": [
+    {
+      "kind": "Exe",
+      "id": "1Password.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Bitwarden.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "KeePass.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Flow.Launcher.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "PowerToys.PowerLauncher.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "PowerToys.ColorPickerUI.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "PowerToys.FancyZonesEditor.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Taskmgr.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "ProcessHacker.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "SystemInformer.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "windhawk.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "WindhawkUI.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "EarTrumpet.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "SnippingTool.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "ScreenClippingHost.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "CalculatorApp.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "calc.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Control.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "cleanmgr.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "regedit.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "msconfig.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "mmc.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "dxdiag.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "services.msc",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "VolumeControl.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "SndVol.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Origin.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "EpicGamesLauncher.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Battle.net.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "RiotClientServices.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "QuickLook.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "yasb.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Class",
+      "id": "#32770",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Class",
+      "id": "OperationStatusWindow",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Class",
+      "id": "CabinetWClass",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Class",
+      "id": "Shell_Dialog",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Class",
+      "id": "SunAwtDialog",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Class",
+      "id": "Credential Dialog Xaml Host",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Picture-in-Picture",
+      "matching_strategy": "Contains"
+    },
+    {
+      "kind": "Title",
+      "id": "Picture in Picture",
+      "matching_strategy": "Contains"
+    },
+    {
+      "kind": "Title",
+      "id": "Properties",
+      "matching_strategy": "EndsWith"
+    },
+    {
+      "kind": "Title",
+      "id": "Open",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Save As",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Save File",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Open File",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Select a Folder",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Browse For Folder",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Confirm Exit",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Run",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Rename",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Delete File",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Delete Multiple Items",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Copying",
+      "matching_strategy": "StartsWith"
+    },
+    {
+      "kind": "Title",
+      "id": "Moving",
+      "matching_strategy": "StartsWith"
+    },
+    {
+      "kind": "Title",
+      "id": "Replacing",
+      "matching_strategy": "StartsWith"
+    },
+    {
+      "kind": "Title",
+      "id": "File Operation Progress",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "Windows Security",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Title",
+      "id": "User Account Control",
+      "matching_strategy": "Equals"
+    }
+  ],
+  "manage_rules": [
+    {
+      "kind": "Exe",
+      "id": "WindowsTerminal.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Code.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "firefox.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "chrome.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "msedge.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Discord.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Slack.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Spotify.exe",
+      "matching_strategy": "Equals"
+    },
+    {
+      "kind": "Exe",
+      "id": "Obsidian.exe",
+      "matching_strategy": "Equals"
+    }
+  ]
+}

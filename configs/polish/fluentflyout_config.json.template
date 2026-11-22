@@ -1,0 +1,69 @@
+{
+  "$schema": "https://raw.githubusercontent.com/fluent-flyout/fluentflyout/main/schema.json",
+  "General": {
+    "RunAtStartup": true,
+    "ShowTrayIcon": false,
+    "CheckForUpdates": false,
+    "Language": "en-US"
+  },
+  "Appearance": {
+    "Theme": "{{variant}}",
+    "Backdrop": "{{perf.flyout.backdrop}}",
+    "AccentColor": "{{colors.accent}}",
+    "AccentSecondaryColor": "{{colors.accent_secondary}}",
+    "BackgroundColor": "{{colors.bg_primary}}",
+    "SurfaceColor": "{{colors.bg_surface}}",
+    "ForegroundColor": "{{colors.fg_primary}}",
+    "ForegroundMutedColor": "{{colors.fg_muted}}",
+    "BorderColor": "{{colors.border_active}}",
+    "BorderWidth": {{geometry.border_width}},
+    "CornerRadius": {{geometry.border_radius}},
+    "FontFamily": "{{typography.font_family}}",
+    "FontSize": "{{typography.font_size_md}}",
+    "Opacity": {{opacity.flyout}}
+  },
+  "Placement": {
+    "Alignment": "TopCenter",
+    "DisplayIndex": 0,
+    "OffsetX": 0,
+    "OffsetY": {{geometry.bar_height}},
+    "Margin": {{geometry.window_gap}},
+    "SafePaddingYASB": {{geometry.bar_height}},
+    "KeepOnScreen": true,
+    "AvoidWorkAreaOverlap": true
+  },
+  "Behavior": {
+    "TimeoutMs": {{perf.flyout.timeout_ms}},
+    "AnimateShow": {{perf.flyout.animate_show}},
+    "AnimateHide": {{perf.flyout.animate_hide}},
+    "AnimationDurationMs": {{perf.flyout.animation_duration_ms}},
+    "DismissOnClick": true,
+    "EnableModernMediaControls": true
+  },
+  "Modules": {
+    "Volume": {
+      "Enabled": true,
+      "StepSize": 2,
+      "ShowMuteIndicator": true
+    },
+    "Brightness": {
+      "Enabled": true,
+      "StepSize": 5
+    },
+    "Media": {
+      "Enabled": true,
+      "ShowThumbnail": true,
+      "ShowPlaybackControls": true,
+      "ShowTimeline": true
+    },
+    "AirplaneMode": {
+      "Enabled": false
+    },
+    "LockKeys": {
+      "Enabled": true,
+      "ShowCapsLock": true,
+      "ShowNumLock": false,
+      "ShowScrollLock": false
+    }
+  }
+}

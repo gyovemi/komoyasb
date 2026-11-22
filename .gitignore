@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Tauri / Rust build artifacts
+target/
+ui/src-tauri/target/
+
+# Frontend build artifacts
+dist/
+ui/dist/
+.vite/
+.vite-temp/
+
+# Test and Coverage artifacts
+coverage/
+coverage.xml
+powershell-coverage.xml
+test-summary.md
+
+# Runtime and local state
+themes/.current_theme
+themes/.backups/
+themes/.latest_backup.txt
+
+# OS and Editor metadata
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
