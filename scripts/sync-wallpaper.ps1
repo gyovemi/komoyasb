@@ -49,7 +49,18 @@ if ($PSBoundParameters.ContainsKey('WhatIf') -or $DryRun) {
     $DryRun = $true
 }
 
-$coreHelpersDir = Join-Path $PSScriptRoot "lib"
+$cmdPath = if ($MyInvocation -and $MyInvocation.MyCommand -and ($MyInvocation.MyCommand.PSObject.Properties['Path'])) { $MyInvocation.MyCommand.Path } else { $null }
+$scriptDir = if ($PSScriptRoot) {
+    $PSScriptRoot
+} elseif ($cmdPath) {
+    Split-Path -Parent $cmdPath
+} elseif (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) {
+    Join-Path (Get-WorkspaceRoot) "scripts"
+} else {
+    (Get-Location).Path
+}
+
+$coreHelpersDir = Join-Path $scriptDir "lib"
 $envModule = Join-Path $coreHelpersDir "Environment.psm1"
 if (Test-Path -LiteralPath $envModule) {
     Import-Module $envModule -Force
@@ -88,7 +99,9 @@ if (-not ([System.Management.Automation.PSTypeName]'NativeWallpaper').Type) {
 # Resolve Wallpaper Path
 if ([string]::IsNullOrWhiteSpace($Path)) {
     # Default to dark.png relative to configs/polish/wallpapers
-    $defaultPath = Join-Path $PSScriptRoot "..\configs\polish\wallpapers\dark.png"
+    $repoRoot = if (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) { Get-WorkspaceRoot } else { Split-Path -Parent $scriptDir }
+    if (-not $repoRoot) { $repoRoot = (Get-Location).Path }
+    $defaultPath = Join-Path $repoRoot "configs\polish\wallpapers\dark.png"
     if (Test-Path $defaultPath) {
         $Path = $defaultPath
     } else {
@@ -100,7 +113,7 @@ if ([string]::IsNullOrWhiteSpace($Path)) {
 if (-not [System.IO.Path]::IsPathRooted($Path)) {
     $resolvedPath = Join-Path (Get-Location).Path $Path
     if (-not (Test-Path $resolvedPath)) {
-        $resolvedPath = Join-Path $PSScriptRoot $Path
+        $resolvedPath = Join-Path $scriptDir $Path
     }
     $Path = $resolvedPath
 }

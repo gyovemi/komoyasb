@@ -58,7 +58,18 @@ if ($PSBoundParameters.ContainsKey('WhatIf') -or $DryRun) {
     $DryRun = $true
 }
 
-$coreHelpersDir = Join-Path $PSScriptRoot "lib"
+$cmdPath = if ($MyInvocation -and $MyInvocation.MyCommand -and ($MyInvocation.MyCommand.PSObject.Properties['Path'])) { $MyInvocation.MyCommand.Path } else { $null }
+$scriptDir = if ($PSScriptRoot) {
+    $PSScriptRoot
+} elseif ($cmdPath) {
+    Split-Path -Parent $cmdPath
+} elseif (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) {
+    Join-Path (Get-WorkspaceRoot) "scripts"
+} else {
+    (Get-Location).Path
+}
+
+$coreHelpersDir = Join-Path $scriptDir "lib"
 $envModule = Join-Path $coreHelpersDir "Environment.psm1"
 if (Test-Path -LiteralPath $envModule) {
     Import-Module $envModule -Force
@@ -78,15 +89,25 @@ $allMods = @(
 
 $targetMods = if ($ModId -eq "All") { $allMods } else { @($allMods | Where-Object { $_.Id -eq $ModId }) }
 
-$RepoRoot = if (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) { Get-WorkspaceRoot } else { Split-Path -Parent $PSScriptRoot }
+$RepoRoot = if (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) {
+    Get-WorkspaceRoot
+} elseif ($scriptDir) {
+    $parent = Split-Path -Parent $scriptDir
+    if ($parent) { $parent } else { (Get-Location).Path }
+} else {
+    (Get-Location).Path
+}
+if (-not $RepoRoot) {
+    $RepoRoot = (Get-Location).Path
+}
 
 # Resolve mods source directory
 $CandidateModsDirs = @(
     (Join-Path $RepoRoot "configs\shell\windhawk"),
-    (Join-Path $PSScriptRoot "windhawk_mods"),
+    (Join-Path $scriptDir "windhawk_mods"),
     (Join-Path $RepoRoot "scripts\windhawk_mods")
 )
-$ModsSourceDir = Join-Path $PSScriptRoot "windhawk_mods"
+$ModsSourceDir = Join-Path $scriptDir "windhawk_mods"
 foreach ($dir in $CandidateModsDirs) {
     if (Test-Path -LiteralPath $dir) {
         $ModsSourceDir = (Resolve-Path $dir).Path

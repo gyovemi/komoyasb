@@ -364,7 +364,7 @@ try {
     }
     Assert-SecurityRule -Name "Rootless AST Gate: Zero -Verb RunAs elevation calls" `
         -Condition (-not $elevationFound) `
-        -Details "Checked $($psFiles.Count) scripts/modules: Zero elevation demands found"
+        -Details "Checked $(@($psFiles).Count) scripts/modules: Zero elevation demands found"
 
     # Test 3.2: Zero Live Registry Writes
     $regTestKeyHKCU = "HKCU:\Software\komoyasb_security_test"
@@ -392,7 +392,7 @@ try {
     Invoke-SystemAction -ActionType "WindhawkMod" -Target "taskbar-autohide" -Metadata @{ Action = "Load" } | Out-Null
 
     $afterProcesses = @(Get-Process -Name "winget", "windhawk-cli", "komorebi", "whkd", "yasb" -ErrorAction SilentlyContinue)
-    $newProcessesSpawned = ($afterProcesses.Count - $beforeProcesses.Count) -gt 0
+    $newProcessesSpawned = (@($afterProcesses).Count - @($beforeProcesses).Count) -gt 0
 
     Assert-SecurityRule -Name "Process Interception: Zero Elevated Tools Spawned" `
         -Condition (-not $newProcessesSpawned) `
@@ -483,7 +483,7 @@ try {
     }
     Assert-SecurityRule -Name "Static Scan: Zero Invoke-Expression in internal scripts" `
         -Condition (-not $iexFound) `
-        -Details "Checked $($psFiles.Count) production scripts/modules: Zero Invoke-Expression / iex invocations detected"
+        -Details "Checked $(@($psFiles).Count) production scripts/modules: Zero Invoke-Expression / iex invocations detected"
 
     # Test 4.3: Static Scan: Zero cmd /C or powershell -Command injection in Rust
     $rsFiles = Get-ChildItem -Path (Join-Path $repoRoot "ui\src-tauri") -Recurse -Include "*.rs"
@@ -499,7 +499,7 @@ try {
     }
     Assert-SecurityRule -Name "Static Scan: Zero cmd /C or powershell -Command injection in Rust" `
         -Condition (-not $rustInjFound) `
-        -Details "Checked $($rsFiles.Count) Rust source files: Zero shell injection patterns found"
+        -Details "Checked $(@($rsFiles).Count) Rust source files: Zero shell injection patterns found"
 
     # Test 4.4: Static Scan: NSIS installMode is currentUser in tauri.conf.json
     $tauriConfPath = Join-Path $repoRoot "ui\src-tauri\tauri.conf.json"

@@ -101,7 +101,7 @@ function Get-InstalledWingetPackages {
                     continue
                 }
                 $columnTokens = $trimmedLine -split '\s{2,}'
-                if ($columnTokens.Count -ge 2) {
+                if (@($columnTokens).Count -ge 2) {
                     $possibleId = $columnTokens[1].Trim()
                     if ($possibleId -and -not $possibleId.Contains(" ")) {
                         [void]$packageSet.Add($possibleId)
@@ -134,20 +134,71 @@ function Get-WorkspaceRoot {
     [CmdletBinding()]
     param()
 
-    $currentDir = $PSScriptRoot
-    while ($currentDir -and (Test-Path -LiteralPath $currentDir)) {
-        if ((Test-Path -LiteralPath (Join-Path $currentDir "themes")) -and 
-            (Test-Path -LiteralPath (Join-Path $currentDir "configs"))) {
-            return (Resolve-Path -LiteralPath $currentDir).Path
-        }
-        if (Test-Path -LiteralPath (Join-Path $currentDir "docs\ARCHITECTURE.md")) {
-            return (Resolve-Path -LiteralPath $currentDir).Path
-        }
-        $parentDir = Split-Path -Parent $currentDir
-        if ($parentDir -eq $currentDir) { break }
-        $currentDir = $parentDir
+    $startDirs = @()
+    if ($PSScriptRoot) {
+        $startDirs += $PSScriptRoot
     }
-    return (Get-Location).Path
+    $cwd = (Get-Location).Path
+    if ($cwd) {
+        $startDirs += $cwd
+    }
+
+    foreach ($startDir in $startDirs) {
+        $currentDir = $startDir
+        while ($currentDir -and (Test-Path -LiteralPath $currentDir)) {
+            if ((Test-Path -LiteralPath (Join-Path $currentDir "themes")) -and 
+                (Test-Path -LiteralPath (Join-Path $currentDir "configs"))) {
+                return (Resolve-Path -LiteralPath $currentDir).Path
+            }
+            if (Test-Path -LiteralPath (Join-Path $currentDir "docs\ARCHITECTURE.md")) {
+                return (Resolve-Path -LiteralPath $currentDir).Path
+            }
+            $parentDir = Split-Path -Parent $currentDir
+            if (-not $parentDir -or $parentDir -eq $currentDir) { break }
+            $currentDir = $parentDir
+        }
+    }
+
+    $isSystemDir = $false
+    $systemFolders = @(
+        [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::System),
+        [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::Windows),
+        [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ProgramFiles),
+        [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::ProgramFilesX86)
+    )
+    foreach ($sysFolder in $systemFolders) {
+        if ($sysFolder -and $cwd.StartsWith($sysFolder, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $isSystemDir = $true
+            break
+        }
+    }
+
+    $knownInstallPaths = @()
+    if ($env:LOCALAPPDATA) {
+        $knownInstallPaths += (Join-Path $env:LOCALAPPDATA "komoyasb")
+    }
+    if ($env:USERPROFILE) {
+        $knownInstallPaths += (Join-Path $env:USERPROFILE ".komoyasb")
+    }
+
+    foreach ($path in $knownInstallPaths) {
+        try {
+            if ($path -and (Test-Path -LiteralPath $path -ErrorAction SilentlyContinue)) {
+                if ((Test-Path -LiteralPath (Join-Path $path "themes") -ErrorAction SilentlyContinue) -and 
+                    (Test-Path -LiteralPath (Join-Path $path "configs") -ErrorAction SilentlyContinue)) {
+                    return (Resolve-Path -LiteralPath $path).Path
+                }
+            }
+        } catch {}
+    }
+
+    if ($isSystemDir) {
+        if (@($knownInstallPaths).Count -gt 0) {
+            return $knownInstallPaths[0]
+        }
+    }
+
+    return $cwd
 }
 
 function Test-IsAdministrator {

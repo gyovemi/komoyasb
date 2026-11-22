@@ -40,7 +40,7 @@
 .NOTES
     Part of the komoyasb desktop automation suite.
 #>
-[CmdletBinding(SupportsShouldProcess = $true)]
+[CmdletBinding(SupportsShouldProcess = $true, PositionalBinding = $false)]
 param(
     [Parameter(Mandatory = $false)]
     [switch]$SkipPackages,
@@ -103,7 +103,31 @@ function Measure-InstallPhase {
     }
 }
 
-$coreHelpersDir = Join-Path $PSScriptRoot "scripts\lib"
+$cmdPath = if ($MyInvocation -and $MyInvocation.MyCommand -and ($MyInvocation.MyCommand.PSObject.Properties['Path'])) { $MyInvocation.MyCommand.Path } else { $null }
+$scriptDir = if ($PSScriptRoot) {
+    $PSScriptRoot
+} elseif ($cmdPath) {
+    Split-Path -Parent $cmdPath
+} elseif (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) {
+    Get-WorkspaceRoot
+} else {
+    $fallbackCandidates = @(
+        (Join-Path $env:LOCALAPPDATA "komoyasb"),
+        (Get-Location).Path
+    )
+    $resolvedDir = $null
+    foreach ($cand in $fallbackCandidates) {
+        try {
+            if ($cand -and (Test-Path -LiteralPath (Join-Path $cand "scripts\lib\Environment.psm1") -ErrorAction SilentlyContinue)) {
+                $resolvedDir = $cand
+                break
+            }
+        } catch {}
+    }
+    if ($resolvedDir) { $resolvedDir } else { (Get-Location).Path }
+}
+
+$coreHelpersDir = Join-Path $scriptDir "scripts\lib"
 Import-Module (Join-Path $coreHelpersDir "Environment.psm1") -Force
 
 # Privilege resolution:
@@ -208,7 +232,7 @@ Measure-InstallPhase -PhaseName "Config Backups" -Block {
         }
     }
 
-    if ($backupManifest.Backups.Count -eq 0) {
+    if (@($backupManifest.Backups).Count -eq 0) {
         Write-Host "No existing target configuration files found to back up. Skipping snapshot creation."
         return
     }

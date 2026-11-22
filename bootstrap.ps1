@@ -246,18 +246,30 @@ if (-not (Test-Path -LiteralPath $installerScript)) {
     throw "[komoyasb:bootstrap] Entry script not found at expected location: $installerScript"
 }
 
-$forwardList = if ($ForwardArgs) { [System.Collections.Generic.List[string]]::new([string[]]$ForwardArgs) } else { [System.Collections.Generic.List[string]]::new() }
+$forwardList = [System.Collections.Generic.List[string]]::new()
+if ($ForwardArgs) {
+    foreach ($arg in $ForwardArgs) {
+        if (-not [string]::IsNullOrWhiteSpace($arg)) {
+            $forwardList.Add([string]$arg)
+        }
+    }
+}
+
 if ($rootlessMode -and -not ($forwardList -contains "-NoAdmin")) {
     $forwardList.Add("-NoAdmin")
 }
 
 Write-Host "[komoyasb:bootstrap] Invoking installer: $installerScript" -ForegroundColor Green
-if ($forwardList.Count -gt 0) {
+if (@($forwardList).Count -gt 0) {
     Write-Host "[komoyasb:bootstrap] Forwarding arguments: $($forwardList -join ' ')" -ForegroundColor DarkGray
-    & $installerScript @forwardList
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installerScript $forwardList
 }
 else {
-    & $installerScript
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installerScript
+}
+
+if ($LASTEXITCODE -ne 0) {
+    throw "[komoyasb:bootstrap] Installer execution failed with exit code $LASTEXITCODE."
 }
 
 Write-Host "[komoyasb:bootstrap] Execution completed." -ForegroundColor Green

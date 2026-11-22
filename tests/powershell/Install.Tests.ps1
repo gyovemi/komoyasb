@@ -204,4 +204,87 @@ Describe "install.ps1 Unit & Integration Tests" {
             $windhawkAction.metadata.Skipped | Should -BeTrue
         }
     }
+
+    Context "Collection Count Safety under Set-StrictMode Latest" {
+        BeforeAll {
+            Set-StrictMode -Version Latest
+        }
+
+        It "Verifies 0-item collections never throw 'Property Count cannot be found'" {
+            $emptyArray = @()
+            { @($emptyArray).Count | Should -Be 0 } | Should -Not -Throw
+
+            # Test backup manifest with 0 items
+            $manifest0 = [PSCustomObject]@{ Backups = @() }
+            { @($manifest0.Backups).Count | Should -Be 0 } | Should -Not -Throw
+            (@($manifest0.Backups).Count -eq 0) | Should -BeTrue
+        }
+
+        It "Verifies 1-item scalar or collection never throws 'Property Count cannot be found'" {
+            $singleScalar = "single_string_value"
+            # In PowerShell with StrictMode Latest, $singleScalar.Count throws PropertyNotFoundStrict.
+            # Wrapping with @($singleScalar).Count guarantees array casting without error.
+            { @($singleScalar).Count | Should -Be 1 } | Should -Not -Throw
+
+            # PS 5.1 ConvertFrom-Json scalar unrolling simulation
+            $manifest1 = [PSCustomObject]@{ Backups = "single_backup_file.json" }
+            { @($manifest1.Backups).Count | Should -Be 1 } | Should -Not -Throw
+            (@($manifest1.Backups).Count -gt 0) | Should -BeTrue
+            (@($manifest1.Backups).Count -eq 0) | Should -BeFalse
+        }
+
+        It "Verifies N-item collections evaluate count correctly under StrictMode" {
+            $multiArray = @("item1", "item2", "item3")
+            { @($multiArray).Count | Should -Be 3 } | Should -Not -Throw
+
+            $manifestN = [PSCustomObject]@{ Backups = @("b1.json", "b2.json", "b3.json") }
+            { @($manifestN.Backups).Count | Should -Be 3 } | Should -Not -Throw
+            (@($manifestN.Backups).Count -eq 0) | Should -BeFalse
+        }
+
+        It "Executes install.ps1 when 0 backup items exist without Count property exceptions" {
+            $testDir = (Get-PSDrive TestDrive).Root
+            $sandboxDir = Join-Path $testDir "install-shadow-0backup"
+            $installScript = Join-Path $repoRoot "install.ps1"
+
+            # Mock backup discovery to simulate 0 items
+            Mock -CommandName Test-Path { return $false }
+
+            { & $installScript -DryRun -SandboxRoot $sandboxDir -KeepSandbox -SkipPackages -NoAdmin } | Should -Not -Throw
+        }
+    }
+
+    Context "ScriptRoot Resilience (Empty or Null `$PSScriptRoot)" {
+        It "Executes install.ps1 successfully when `$PSScriptRoot is empty or null" {
+            $testDir = (Get-PSDrive TestDrive).Root
+            $sandboxDir = Join-Path $testDir "install-shadow-nullscriptroot"
+            $installScript = Join-Path $repoRoot "install.ps1"
+
+            # Simulate execution via scriptblock without $PSScriptRoot set (e.g. Invoke-Expression or remote fetch)
+            $installContent = Get-Content -LiteralPath $installScript -Raw
+            $sb = [scriptblock]::Create($installContent)
+
+            # Invoking a scriptblock directly leaves $PSScriptRoot as empty/null in the script's scope
+            { & $sb -DryRun -SandboxRoot $sandboxDir -KeepSandbox -SkipPackages -NoAdmin } | Should -Not -Throw
+
+            (Test-Path -LiteralPath $sandboxDir) | Should -BeTrue
+        }
+
+        It "Resolves workspace helpers even when invoked via Invoke-Expression from C:\Windows\System32" {
+            $testDir = (Get-PSDrive TestDrive).Root
+            $sandboxDir = Join-Path $testDir "install-shadow-iex-sys32"
+            $installScript = Join-Path $repoRoot "install.ps1"
+
+            $prevCwd = (Get-Location).Path
+            Set-Location "C:\Windows\System32"
+            try {
+                $cmd = "& '$installScript' -DryRun -SandboxRoot '$sandboxDir' -KeepSandbox -SkipPackages -NoAdmin"
+                { Invoke-Expression $cmd } | Should -Not -Throw
+            } finally {
+                Set-Location $prevCwd
+            }
+
+            (Test-Path -LiteralPath $sandboxDir) | Should -BeTrue
+        }
+    }
 }

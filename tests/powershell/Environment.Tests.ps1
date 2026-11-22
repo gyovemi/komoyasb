@@ -25,6 +25,18 @@
             (Test-Path -LiteralPath (Join-Path $root "themes")) | Should -BeTrue
             (Test-Path -LiteralPath (Join-Path $root "configs")) | Should -BeTrue
         }
+
+        It "Avoids returning System32 when invoked from system directory" {
+            $prevCwd = (Get-Location).Path
+            Set-Location "C:\Windows\System32"
+            try {
+                $root = Get-WorkspaceRoot
+                $root | Should -Not -BeNullOrEmpty
+                ($root.StartsWith("C:\Windows\System32", [System.StringComparison]::OrdinalIgnoreCase)) | Should -BeFalse
+            } finally {
+                Set-Location $prevCwd
+            }
+        }
     }
 
     Context "Test-CommandAvailable" {

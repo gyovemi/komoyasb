@@ -48,7 +48,18 @@ if ($PSBoundParameters.ContainsKey('WhatIf') -or $DryRun -or $SandboxRoot) {
     $DryRun = $true
 }
 
-$coreHelpersDir = Join-Path $PSScriptRoot "lib"
+$cmdPath = if ($MyInvocation -and $MyInvocation.MyCommand -and ($MyInvocation.MyCommand.PSObject.Properties['Path'])) { $MyInvocation.MyCommand.Path } else { $null }
+$scriptDir = if ($PSScriptRoot) {
+    $PSScriptRoot
+} elseif ($cmdPath) {
+    Split-Path -Parent $cmdPath
+} elseif (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) {
+    Join-Path (Get-WorkspaceRoot) "scripts"
+} else {
+    (Get-Location).Path
+}
+
+$coreHelpersDir = Join-Path $scriptDir "lib"
 Import-Module (Join-Path $coreHelpersDir "Environment.psm1") -Force
 Import-Module (Join-Path $coreHelpersDir "TemplateEngine.psm1") -Force
 

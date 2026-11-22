@@ -85,10 +85,10 @@ if ($nvidiaSmi) {
     $smiOutput = & nvidia-smi --query-gpu=utilization.gpu,temperature.gpu,name --format=csv,noheader,nounits 2>$null
     if ($smiOutput) {
         $outputParts = $smiOutput -split ','
-        if ($outputParts.Count -ge 2) {
+        if (@($outputParts).Count -ge 2) {
             $gpuLoadPercentage = [int]($outputParts[0].Trim())
             $gpuTemperatureCelsius = [int]($outputParts[1].Trim())
-            if ($outputParts.Count -ge 3) {
+            if (@($outputParts).Count -ge 3) {
                 $gpuDeviceName = $outputParts[2].Trim()
             }
         }

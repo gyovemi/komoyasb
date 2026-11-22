@@ -42,7 +42,18 @@ if ($PSBoundParameters.ContainsKey('WhatIf') -or $DryRun) {
     $DryRun = $true
 }
 
-$coreHelpersDir = Join-Path $PSScriptRoot "lib"
+$cmdPath = if ($MyInvocation -and $MyInvocation.MyCommand -and ($MyInvocation.MyCommand.PSObject.Properties['Path'])) { $MyInvocation.MyCommand.Path } else { $null }
+$scriptDir = if ($PSScriptRoot) {
+    $PSScriptRoot
+} elseif ($cmdPath) {
+    Split-Path -Parent $cmdPath
+} elseif (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) {
+    Join-Path (Get-WorkspaceRoot) "scripts"
+} else {
+    (Get-Location).Path
+}
+
+$coreHelpersDir = Join-Path $scriptDir "lib"
 Import-Module (Join-Path $coreHelpersDir "Environment.psm1") -Force
 
 $isDry = $DryRun -or ((Get-Command "Test-IsDryRun" -ErrorAction SilentlyContinue) -and (Test-IsDryRun))
@@ -161,7 +172,7 @@ function Format-ProcessArguments {
         [string[]]$Arguments
     )
 
-    if ($null -eq $Arguments -or $Arguments.Count -eq 0) {
+    if ($null -eq $Arguments -or @($Arguments).Count -eq 0) {
         return ""
     }
 
@@ -225,7 +236,7 @@ function Start-FullStack {
     Write-Host "=== Launching Desktop Environment Sequence ==="
     
     # Stage 1: Theme sync
-    $themeSyncScript = Join-Path $PSScriptRoot "sync-theme.ps1"
+    $themeSyncScript = Join-Path $scriptDir "sync-theme.ps1"
     if (Test-Path -LiteralPath $themeSyncScript) {
         Write-Host "Stage 1: Syncing themes and templates..."
         & $themeSyncScript -DryRun:$effectiveDry

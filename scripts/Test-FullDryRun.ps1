@@ -15,7 +15,10 @@
     - Step 11 (Sandbox Auto-Cleanup): Asserts that when -KeepSandbox is omitted, the sandbox is completely removed.
     - Step 12 (Failure Recovery): Asserts graceful failure handling for missing themes, corrupted sandboxes,
       and invalid performance profiles with zero host mutation.
-    - Step 13 (Final Host Zero-Mutation Check): Final cryptographic assertion against baseline snapshot.
+    - Step 13 (Pre-Bootstrap Baseline Assertion): Intermediate cryptographic assertion against baseline snapshot.
+    - Stage 14 (Bootstrap & IEX Reliability Gate from System32): Safely simulates executing bootstrap.ps1
+      via [scriptblock]::Create / Invoke-Expression from C:\Windows\System32 with -DryRun and verifies
+      0 errors and 0 host mutations.
 .PARAMETER KeepSandbox
     Retains all temporary sandbox folders upon completion for inspection.
 .OUTPUTS
@@ -947,18 +950,63 @@ try {
     Write-Host "     Template fuzzing with backslashes, double quotes, and single quotes passed across all templates." -ForegroundColor Green
 
     # -------------------------------------------------------------------------
-    # STEP 13: FINAL HOST ZERO-MUTATION CHECK
+    # STEP 13: PRE-BOOTSTRAP MATRIX CRYPTOGRAPHIC ASSERTION
     # -------------------------------------------------------------------------
-    Write-Host "`n>>> Step 13: Performing final cryptographic check against baseline snapshot across all matrices..." -ForegroundColor Yellow
-    $finalSnapshot = Take-HostSnapshot -Paths $liveTargets
-    $zeroMutationFinal = Compare-HostSnapshot -Baseline $baselineSnapshot -Current $finalSnapshot -StageName "Step 13: Final Complete Matrix Assertion"
-    if (-not $zeroMutationFinal) {
-        throw "Step 13 Failed: Live host was modified after complete dry-run test suite execution!"
+    Write-Host "`n>>> Step 13: Performing cryptographic check against baseline snapshot across all matrices..." -ForegroundColor Yellow
+    $step13Snapshot = Take-HostSnapshot -Paths $liveTargets
+    $zeroMutationStep13 = Compare-HostSnapshot -Baseline $baselineSnapshot -Current $step13Snapshot -StageName "Step 13: Matrix Assertion"
+    if (-not $zeroMutationStep13) {
+        throw "Step 13 Failed: Live host was modified after dry-run matrix execution!"
     }
+
+    # -------------------------------------------------------------------------
+    # STAGE 14: BOOTSTRAP & IEX RELIABILITY GATE FROM SYSTEM32
+    # -------------------------------------------------------------------------
+    Write-Host "`n>>> Stage 14: Bootstrap & IEX Reliability Gate from System32..." -ForegroundColor Yellow
+
+    # 14A: Execute bootstrap.ps1 via [scriptblock]::Create from C:\Windows\System32 with -DryRun
+    Write-Host "  -> [14A] Simulating bootstrap.ps1 via [scriptblock]::Create from C:\Windows\System32 with -DryRun..." -ForegroundColor Cyan
+    $bootstrapScriptPath = Join-Path $repoRoot "bootstrap.ps1"
+
+    $sbProc = Start-Process -FilePath "powershell.exe" `
+        -ArgumentList @(
+            "-NoProfile",
+            "-ExecutionPolicy", "Bypass",
+            "-Command",
+            "Set-Location 'C:\Windows\System32'; `$content = Get-Content -LiteralPath '$bootstrapScriptPath' -Raw; `$sb = [scriptblock]::Create(`$content); & `$sb -DryRun -InstallDir '$repoRoot' -NoAdmin"
+        ) `
+        -NoNewWindow -Wait -PassThru
+
+    if ($sbProc.ExitCode -ne 0) {
+        throw "Stage 14A Failed: bootstrap.ps1 via [scriptblock]::Create from System32 failed with exit code $($sbProc.ExitCode)"
+    }
+
+    # 14B: Execute bootstrap.ps1 via Invoke-Expression from C:\Windows\System32 with -DryRun
+    Write-Host "  -> [14B] Simulating bootstrap.ps1 via Invoke-Expression from C:\Windows\System32 with -DryRun..." -ForegroundColor Cyan
+    $iexProc = Start-Process -FilePath "powershell.exe" `
+        -ArgumentList @(
+            "-NoProfile",
+            "-ExecutionPolicy", "Bypass",
+            "-Command",
+            "Set-Location 'C:\Windows\System32'; `$content = Get-Content -LiteralPath '$bootstrapScriptPath' -Raw; Invoke-Expression ('& { ' + `$content + ' } -DryRun -InstallDir ' + [char]39 + '$repoRoot' + [char]39 + ' -NoAdmin')"
+        ) `
+        -NoNewWindow -Wait -PassThru
+
+    if ($iexProc.ExitCode -ne 0) {
+        throw "Stage 14B Failed: bootstrap.ps1 via Invoke-Expression from System32 failed with exit code $($iexProc.ExitCode)"
+    }
+
+    # Stage 14 Final Complete Host Immutability Assertion
+    $finalSnapshot = Take-HostSnapshot -Paths $liveTargets
+    $zeroMutationFinal = Compare-HostSnapshot -Baseline $baselineSnapshot -Current $finalSnapshot -StageName "Stage 14: Final Complete Matrix & Bootstrap Gate Assertion"
+    if (-not $zeroMutationFinal) {
+        throw "Stage 14 Failed: Live host was modified after bootstrap.ps1 execution from System32!"
+    }
+    Write-Host "     Stage 14 Passed: Bootstrap executed cleanly under [scriptblock]::Create and Invoke-Expression from System32 with 0 mutations." -ForegroundColor Green
 
     Write-Host "`n================================================================" -ForegroundColor Cyan
     Write-Host "  FULL DRY-RUN VERIFICATION PASSED: 100% HOST IMMUTABILITY      " -ForegroundColor Green
-    Write-Host "  ALL 4 PROFILES, 2 THEMES, FLAGS & RECOVERY SCENARIOS PASSED   " -ForegroundColor Green
+    Write-Host "  ALL 4 PROFILES, 2 THEMES, FLAGS, RECOVERY & BOOTSTRAP PASSED  " -ForegroundColor Green
     Write-Host "================================================================" -ForegroundColor Cyan
     $exitCode = 0
 }

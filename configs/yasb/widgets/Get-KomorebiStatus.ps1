@@ -35,7 +35,7 @@ try {
         $focusedWorkspace = $focusedMonitor.workspaces.elements[$focusedMonitor.workspaces.focused]
         
         $layoutName = if ($focusedWorkspace.layout.Default) { $focusedWorkspace.layout.Default } else { "BSP" }
-        $windowCount = $focusedWorkspace.containers.elements.Count
+        $windowCount = @($focusedWorkspace.containers.elements).Count
 
         [PSCustomObject]@{
             status = "online"

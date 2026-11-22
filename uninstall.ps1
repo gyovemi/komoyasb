@@ -32,7 +32,7 @@
 .NOTES
     Part of the komoyasb desktop automation suite.
 #>
-[CmdletBinding(SupportsShouldProcess = $true)]
+[CmdletBinding(SupportsShouldProcess = $true, PositionalBinding = $false)]
 param(
     [Parameter(Mandatory = $false)]
     [string]$BackupDir = "",
@@ -60,7 +60,31 @@ if ($PSBoundParameters.ContainsKey('WhatIf') -or $DryRun) {
     $DryRun = $true
 }
 
-$coreHelpersDir = Join-Path $PSScriptRoot "scripts\lib"
+$cmdPath = if ($MyInvocation -and $MyInvocation.MyCommand -and ($MyInvocation.MyCommand.PSObject.Properties['Path'])) { $MyInvocation.MyCommand.Path } else { $null }
+$scriptDir = if ($PSScriptRoot) {
+    $PSScriptRoot
+} elseif ($cmdPath) {
+    Split-Path -Parent $cmdPath
+} elseif (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) {
+    Get-WorkspaceRoot
+} else {
+    $fallbackCandidates = @(
+        (Join-Path $env:LOCALAPPDATA "komoyasb"),
+        (Get-Location).Path
+    )
+    $resolvedDir = $null
+    foreach ($cand in $fallbackCandidates) {
+        try {
+            if ($cand -and (Test-Path -LiteralPath (Join-Path $cand "scripts\lib\Environment.psm1") -ErrorAction SilentlyContinue)) {
+                $resolvedDir = $cand
+                break
+            }
+        } catch {}
+    }
+    if ($resolvedDir) { $resolvedDir } else { (Get-Location).Path }
+}
+
+$coreHelpersDir = Join-Path $scriptDir "scripts\lib"
 Import-Module (Join-Path $coreHelpersDir "Environment.psm1") -Force
 
 # Privilege resolution:
@@ -118,7 +142,7 @@ if (Test-Path -LiteralPath $windhawkScript) {
 
 # Helper to clean up deployed runtime files
 function Remove-ManagedRuntimeFiles {
-    [CmdletBinding(SupportsShouldProcess = $true)]
+    [CmdletBinding(SupportsShouldProcess = $true, PositionalBinding = $false)]
     param([switch]$DryRun)
 
     Write-Host "Cleaning up runtime files deployed by komoyasb..."
@@ -224,7 +248,7 @@ if ($selectedBackupDir) {
 
     if ($manifest -and $manifest.PSObject.Properties['Backups'] -and $null -ne $manifest.Backups) {
         $backupEntries = @($manifest.Backups)
-        if ($backupEntries.Count -gt 0) {
+        if (@($backupEntries).Count -gt 0) {
             Write-Host "Restoring backups from timestamp: $($manifest.Timestamp) ($effectiveBackupDir)"
             $restoredAny = $false
 

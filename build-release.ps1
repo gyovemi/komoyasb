@@ -67,14 +67,14 @@ foreach ($targetScriptFile in $psScripts) {
     $tokens = $null
     $errors = $null
     [System.Management.Automation.Language.Parser]::ParseInput((Get-Content -LiteralPath $targetScriptFile.FullName -Raw), [ref]$tokens, [ref]$errors) | Out-Null
-    if ($errors.Count -gt 0) {
-        $astErrors += "$($targetScriptFile.FullName): $($errors.Count) errors"
+    if (@($errors).Count -gt 0) {
+        $astErrors += "$($targetScriptFile.FullName): $(@($errors).Count) errors"
     }
 }
-if ($astErrors.Count -gt 0) {
+if (@($astErrors).Count -gt 0) {
     Write-Error "PowerShell AST validation failed:`n$($astErrors -join "`n")"
 }
-Write-Host "      All $($psScripts.Count) PowerShell scripts passed AST validation cleanly." -ForegroundColor Green
+Write-Host "      All $(@($psScripts).Count) PowerShell scripts passed AST validation cleanly." -ForegroundColor Green
 
 # 1.2 TypeScript compilation and frontend bundle build
 Write-Host "  [+] Compiling Frontend (TypeScript & Vite)..."
@@ -176,14 +176,14 @@ if (Test-Path $tauriBundleDir) {
 # Generate unified SHA256SUMS.txt for all .exe files in dist/
 if (Test-Path $distDir) {
     $distExeFiles = Get-ChildItem -Path $distDir -Filter "*.exe" -File
-    if ($distExeFiles -and $distExeFiles.Count -gt 0) {
+    if ($distExeFiles -and @($distExeFiles).Count -gt 0) {
         $shaSumsLines = $distExeFiles | ForEach-Object {
             $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLower()
             "$hash  $($_.Name)"
         }
         $shaSumsPath = Join-Path $distDir "SHA256SUMS.txt"
         $shaSumsLines | Set-Content -LiteralPath $shaSumsPath -Encoding utf8
-        Write-Host "  [+] Generated unified SHA256SUMS.txt ($($distExeFiles.Count) artifacts)" -ForegroundColor Green
+        Write-Host "  [+] Generated unified SHA256SUMS.txt ($(@($distExeFiles).Count) artifacts)" -ForegroundColor Green
     }
 }
 

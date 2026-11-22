@@ -39,7 +39,18 @@ if ($PSBoundParameters.ContainsKey('WhatIf') -or $DryRun) {
     $DryRun = $true
 }
 
-$coreHelpersDir = Join-Path $PSScriptRoot "lib"
+$cmdPath = if ($MyInvocation -and $MyInvocation.MyCommand -and ($MyInvocation.MyCommand.PSObject.Properties['Path'])) { $MyInvocation.MyCommand.Path } else { $null }
+$scriptDir = if ($PSScriptRoot) {
+    $PSScriptRoot
+} elseif ($cmdPath) {
+    Split-Path -Parent $cmdPath
+} elseif (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) {
+    Join-Path (Get-WorkspaceRoot) "scripts"
+} else {
+    (Get-Location).Path
+}
+
+$coreHelpersDir = Join-Path $scriptDir "lib"
 $envModule = Join-Path $coreHelpersDir "Environment.psm1"
 if (Test-Path -LiteralPath $envModule) {
     Import-Module $envModule -Force
@@ -204,7 +215,7 @@ function Apply-ProcessTweak {
         [bool]$EcoQoS
     )
     $procs = @(Get-Process -Name $ProcessName -ErrorAction SilentlyContinue)
-    if ($isDry -and $procs.Count -eq 0) {
+    if ($isDry -and @($procs).Count -eq 0) {
         if ($Priority) {
             Invoke-OsAction -Target "Priority-$ProcessName" -Metadata @{ Action = "PriorityClass"; ProcessName = $ProcessName; PriorityClass = $Priority } -Description "Set PriorityClass ($Priority) on $ProcessName" | Out-Null
         }
@@ -217,7 +228,17 @@ function Apply-ProcessTweak {
     }
 }
 
-$RepoRoot = if (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) { Get-WorkspaceRoot } else { Split-Path -Parent $PSScriptRoot }
+$RepoRoot = if (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) {
+    Get-WorkspaceRoot
+} elseif ($scriptDir) {
+    $parent = Split-Path -Parent $scriptDir
+    if ($parent) { $parent } else { (Get-Location).Path }
+} else {
+    (Get-Location).Path
+}
+if (-not $RepoRoot) {
+    $RepoRoot = (Get-Location).Path
+}
 
 Write-Host "=== komoyasb OS Performance Optimizer ===" -ForegroundColor Cyan
 Write-Host "Action  : $Action" -ForegroundColor Gray
