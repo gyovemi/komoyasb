@@ -57,6 +57,149 @@ Or pass any installation arguments directly through the launcher:
 .\install.cmd -ApplyWindhawk -Theme dark
 ```
 
+### Option C: Standalone Single-Binary Runner (`komoyasb-run.exe`)
+Download `komoyasb-run.exe` directly from the [Releases](https://github.com/gyovemi/komoyasb/releases) page. It is a completely portable, standalone Windows 11 executable with zero dependencies on Git, PowerShell scripts, or Node.js.
+- **Double-click:** Runs silently in the background, bootstraps defaults into `%APPDATA%\komoyasb`, renders templates, and starts the full desktop stack.
+- **Terminal:** Supports full CLI control (`--status`, `--sync`, `--profile`, `--dry-run`, etc.).
+
+---
+
+## Standalone Zero-Dependency Runner (`komoyasb-run.exe`)
+
+`komoyasb-run.exe` is a high-performance, single-binary Windows 11 orchestrator for `komoyasb` written in Rust. It eliminates all runtime dependencies on external repositories, script directories, and PowerShell runtimes by embedding all configuration templates, color themes, performance presets, and default assets directly into the binary's `.rdata` segment.
+
+```
++---------------------------------------------------------------------------------------------------+
+|                                        komoyasb-run.exe                                           |
+|                                                                                                   |
+|  +------------------------------+  +-------------------------------+  +------------------------+  |
+|  |     Embedded Assets          |  |       Configuration &         |  |    Win32 Lifecycle &   |  |
+|  |    (include_dir macro)       |  |       Template Engine         |  |    Process Manager     |  |
+|  |                              |  |                               |  |                        |  |
+|  | * configs/ templates         |  | * %APPDATA%\komoyasb\ state   |  | * Silent GUI Subsystem |  |
+|  | * themes/ (dark/light)       |  | * Token flattening & compute  |  | * Komorebi Pipe Poll   |  |
+|  | * performance.json           |  | * Atomic write (MoveFileExW)  |  | * YASB & WHKD Superv.  |  |
+|  | * Wallpapers & C++ mods      |  | * SHA-256 skip-unchanged      |  | * Rootless Degradation |  |
+|  +------------------------------+  +-------------------------------+  +------------------------+  |
++---------------------------------------------------------------------------------------------------+
+```
+
+### Key Architectural Features:
+- **Zero Repo Dependency:** The binary functions identically anywhere — run it from `C:\Program Files\komoyasb\`, `Downloads`, a USB thumb drive, or an isolated sandbox folder.
+- **Silent Double-Click Behavior:** Compiled with `#![windows_subsystem = "windows"]` to prevent console window flashing when launched from Windows Explorer. When executed from a terminal (PowerShell, cmd.exe, Windows Terminal), it dynamically attaches to the parent console via Win32 `AttachConsole(ATTACH_PARENT_PROCESS)` and prints ANSI-colored status tables.
+- **First-Run Self-Materialization:** On first launch, if `%APPDATA%\komoyasb\` does not exist, the binary automatically extracts and bootstraps all defaults without overwriting existing user files.
+- **Native High-Fidelity Rendering:** Replaces `TemplateEngine.psm1` with a native Rust renderer that guarantees 100% token compatibility (Tokyo Night themes, computed alpha/rgb/argb variants, performance profile tokens) with SHA-256 skip-unchanged atomic writes (`MoveFileExW`).
+- **Sub-Second Readiness Checks:** Native Win32 named pipe verification (`\\.\pipe\komorebi` via `WaitNamedPipeW`) polled every 100 ms up to 5.0s, achieving sub-second full stack startup.
+- **Rootless & Dry-Run Support:** Operates 100% without Administrator elevation (`--no-admin`), and features strict `--dry-run` sandbox simulation generating a cryptographic `ledger.json` with zero live host mutations.
+
+### Command-Line Interface (CLI Flags & Options)
+
+```
+komoyasb-run.exe [FLAGS] [OPTIONS]
+
+FLAGS:
+    -h, --help               Prints help information
+    -V, --version            Prints version information
+        --start              Starts all managed services (default action if zero args)
+        --stop               Stops all running managed services gracefully
+        --restart            Stops then restarts all managed services
+        --status             Queries and displays tabular status of all services
+        --sync               Only syncs themes, renders templates, and exits
+        --no-admin           Forces rootless execution mode (no UAC / no admin)
+        --dry-run            Simulates all actions without modifying host or starting processes
+        --ui                 Launches the Tauri Komoyasb Control Center UI
+        --register-startup   Adds komoyasb-run to HKCU Run key for login startup
+        --unregister-startup Removes komoyasb-run from HKCU Run key
+
+OPTIONS:
+    -t, --theme <NAME>       Theme to compile ("dark", "light", or path) [default: dark]
+    -p, --profile <NAME>     Performance profile ("ultra-low", "balanced", "visual-rich", "gaming")
+    -s, --service <NAME>     Target single service ("komorebi", "whkd", "yasb")
+        --ledger <PATH>      Output path for dry-run JSON execution ledger
+```
+
+### CLI Usage Examples:
+
+```powershell
+# Default launch (silent sync and start of full stack)
+.\komoyasb-run.exe
+
+# Start with a specific theme and performance profile
+.\komoyasb-run.exe --start --theme dark --profile gaming
+
+# Query real-time status of all managed services (PID, memory, pipe state)
+.\komoyasb-run.exe --status
+
+# Only compile templates and sync configurations without starting daemons
+.\komoyasb-run.exe --sync
+
+# Dry-run simulation with structured JSON ledger output
+.\komoyasb-run.exe --dry-run --status --ledger .\dryrun-ledger.json
+
+# Stop all running services gracefully
+.\komoyasb-run.exe --stop
+```
+
+### Windows 11 Login Startup Registration
+
+You can easily configure `komoyasb-run.exe` to start automatically when logging into Windows 11:
+
+#### Method 1: Automatic Registry Registration (Recommended)
+Run the built-in registration command from terminal:
+```powershell
+.\komoyasb-run.exe --register-startup
+```
+This registers `komoyasb-run.exe` in `HKCU\Software\Microsoft\Windows\CurrentVersion\Run`. Because it uses `HKCU`, this works completely in Rootless mode without requiring administrative privileges or UAC prompts.
+To remove it at any time:
+```powershell
+.\komoyasb-run.exe --unregister-startup
+```
+
+#### Method 2: Windows Startup Folder (`shell:startup`)
+1. Press `Win + R`, type `shell:startup`, and press `Enter` to open your user startup folder:
+   `%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup`
+2. Right-click and create a shortcut pointing to `komoyasb-run.exe`.
+3. Because `komoyasb-run.exe` runs silently and defaults to `--start` on zero arguments, it will launch your full desktop environment seamlessly at login with zero flashing console windows.
+
+
+---
+
+## Sandboxed Installation Testing
+
+Testing desktop shell environments and package installations without modifying your live workstation is supported out of the box via our **Two-Tier Installation Sandbox**.
+
+### 1-Command Sandbox Verification
+Run the unified sandbox runner from any PowerShell prompt:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\Start-InstallSandbox.ps1
+```
+
+The runner automatically detects your system capabilities and selects the optimal isolation tier:
+
+- **Tier 1 — Windows Sandbox VM (`.wsb`):** When running on Windows 11/10 Pro, Enterprise, or Education with Hyper-V enabled, the runner provisions a disposable Hyper-V micro-VM running pristine Windows 11. The repository is mounted **strictly read-only** (`<ReadOnly>true</ReadOnly>`), allowing real package installations (`winget`), service registrations, and live process executions with zero host mutation. Telemetry and logs stream back to the host via a dedicated writable exchange folder.
+- **Tier 2 — Local Isolated Profile Sandbox (Fallback & CI):** When running on Windows Home edition or standard CI runners lacking Hyper-V, the runner automatically falls back to an ephemeral environment variable and directory jail (`USERPROFILE`, `APPDATA`, `LOCALAPPDATA`, `TEMP`, `UI_SANDBOX_DIR`) integrated with `DryRunContext.psm1`. Zero live host mutation is cryptographically proven via pre- and post-execution SHA-256 snapshots (`scripts/Test-SandboxIsolation.ps1`).
+
+### Quick CLI Examples
+```powershell
+# Auto-detect mode (Tier 1 WSB when available, Tier 2 Local fallback)
+powershell -ExecutionPolicy Bypass -File .\scripts\Start-InstallSandbox.ps1
+
+# Force Tier 1 Windows Sandbox VM with uninstallation rollback test
+powershell -ExecutionPolicy Bypass -File .\scripts\Start-InstallSandbox.ps1 -Mode WSB -TestUninstall
+
+# Force Tier 2 Local Sandbox in Rootless Mode (-NoAdmin)
+powershell -ExecutionPolicy Bypass -File .\scripts\Start-InstallSandbox.ps1 -Mode Local -NoAdmin
+
+# Retain sandbox execution logs and JSON telemetry report
+powershell -ExecutionPolicy Bypass -File .\scripts\Start-InstallSandbox.ps1 -KeepLogs
+
+# Run cryptographic zero-mutation isolation test
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-SandboxIsolation.ps1
+```
+
+For complete details on Windows Sandbox prerequisites, setup, and troubleshooting, see the [Two-Tier Sandbox Testing Guide](docs/SANDBOX_GUIDE.md).
+
 ---
 
 ## Architecture & Subsystems
@@ -193,6 +336,10 @@ powershell -File .\scripts\Invoke-AllTests.ps1 -SkipRust
   ```powershell
   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-FullDryRun.ps1
   ```
+- **Sandbox Host-Immutability Gate:**
+  ```powershell
+  powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-SandboxIsolation.ps1
+  ```
 
 ---
 
@@ -232,6 +379,8 @@ All shortcuts use ergonomic, conflict-free vim motions:
 ## Documentation & Governance
 
 - [Architecture Blueprint](docs/ARCHITECTURE.md)
+- [Two-Tier Sandbox Testing Guide](docs/SANDBOX_GUIDE.md)
+- [Sandbox Architecture Specification](docs/SANDBOX_ARCHITECTURE.md)
 - [Performance Architecture](docs/PERFORMANCE_ARCHITECTURE.md)
 - [Security & Rootless Specification](docs/SECURITY_ROOTLESS_ARCHITECTURE.md)
 - [Release Runbook & Checklist](docs/RELEASE_CHECKLIST.md)

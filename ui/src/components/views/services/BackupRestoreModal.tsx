@@ -46,24 +46,41 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
   const [isRestoreSuccess, setIsRestoreSuccess] = React.useState<boolean>(false);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
+  const isMountedRef = React.useRef<boolean>(true);
+  const restoreSuccessTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (restoreSuccessTimerRef.current !== null) {
+        clearTimeout(restoreSuccessTimerRef.current);
+      }
+    };
+  }, []);
+
   const fetchBackups = React.useCallback(async () => {
     setIsLoadingBackups(true);
     setErrorMessage(null);
     try {
       const fetchedSnapshots = await systemApi.getBackups();
+      if (!isMountedRef.current) return;
       setBackupSnapshots(fetchedSnapshots);
-      if (fetchedSnapshots.length > 0 && !selectedSnapshot) {
-        setSelectedSnapshot(fetchedSnapshots[0]);
+      if (fetchedSnapshots.length > 0) {
+        setSelectedSnapshot((prev) => prev ?? fetchedSnapshots[0]);
       }
     } catch (fetchError: unknown) {
+      if (!isMountedRef.current) return;
       const displayMessage = fetchError && typeof fetchError === 'object' && 'message' in fetchError
         ? String((fetchError as { message: string }).message)
         : 'Failed to load backup snapshots';
       setErrorMessage(displayMessage);
     } finally {
-      setIsLoadingBackups(false);
+      if (isMountedRef.current) {
+        setIsLoadingBackups(false);
+      }
     }
-  }, [selectedSnapshot]);
+  }, []);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -78,21 +95,30 @@ export const BackupRestoreModal: React.FC<BackupRestoreModalProps> = ({
     setIsRestoreSuccess(false);
     try {
       await systemApi.restoreBackup(confirmingTimestamp);
+      if (!isMountedRef.current) return;
       setIsRestoreSuccess(true);
       setConfirmingTimestamp(null);
       if (onRestoreSuccess) {
         onRestoreSuccess();
       }
-      setTimeout(() => {
-        setIsRestoreSuccess(false);
+      if (restoreSuccessTimerRef.current !== null) {
+        clearTimeout(restoreSuccessTimerRef.current);
+      }
+      restoreSuccessTimerRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          setIsRestoreSuccess(false);
+        }
       }, 4000);
     } catch (restoreError: unknown) {
+      if (!isMountedRef.current) return;
       const displayMessage = restoreError && typeof restoreError === 'object' && 'message' in restoreError
         ? String((restoreError as { message: string }).message)
         : 'Failed to restore snapshot';
       setErrorMessage(displayMessage);
     } finally {
-      setIsRestoringBackup(false);
+      if (isMountedRef.current) {
+        setIsRestoringBackup(false);
+      }
     }
   };
 

@@ -177,10 +177,19 @@ if ($DryRun) {
             Push-Location $repoRoot
             try {
                 & git add ui/package.json ui/src-tauri/Cargo.toml ui/src-tauri/tauri.conf.json
+                if ($LASTEXITCODE -ne 0) {
+                    throw "git add failed with exit code $LASTEXITCODE"
+                }
                 if ($hasChangelog) {
                     & git add CHANGELOG.md
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "git add CHANGELOG.md failed with exit code $LASTEXITCODE"
+                    }
                 }
                 & git commit -m "chore(release): v$Version"
+                if ($LASTEXITCODE -ne 0) {
+                    throw "git commit failed with exit code $LASTEXITCODE"
+                }
                 Write-Host "  [+] Committed version bump v$Version" -ForegroundColor Green
             } finally {
                 Pop-Location
@@ -195,6 +204,9 @@ if ($DryRun) {
             Push-Location $repoRoot
             try {
                 & git tag -a "v$Version" -m "Release v$Version"
+                if ($LASTEXITCODE -ne 0) {
+                    throw "git tag failed with exit code $LASTEXITCODE"
+                }
                 Write-Host "  [+] Created git tag v$Version" -ForegroundColor Green
             } finally {
                 Pop-Location

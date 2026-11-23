@@ -23,7 +23,11 @@ import type {
   ExecutionLedger,
   PerformanceConfig,
 } from '../types/ipc';
-import { assertValidThemeName, assertValidPath } from './validation';
+import {
+  assertValidThemeName,
+  assertValidPath,
+  assertValidSnapshotTimestamp,
+} from './validation';
 
 /**
  * Safely invokes a Tauri v2 backend IPC command with structured error normalization.
@@ -202,7 +206,7 @@ export const systemApi = {
   getBackups: (): Promise<BackupSnapshot[]> => invokeCommand<BackupSnapshot[]>('get_backups'),
   /** Restores configuration files from a historical backup snapshot timestamp. */
   restoreBackup: (snapshotTimestamp: string): Promise<void> => {
-    assertValidThemeName(snapshotTimestamp);
+    assertValidSnapshotTimestamp(snapshotTimestamp);
     return invokeCommand<void>('restore_backup', { timestamp: snapshotTimestamp });
   },
   /** Queries sandbox environment state and live working directory paths. */

@@ -370,6 +370,13 @@ describe('ipc client', () => {
       expect(mockInvoke).toHaveBeenCalledWith('restore_backup', { timestamp: '20261122_120000' });
     });
 
+    it('restoreBackup rejects invalid timestamp with validation error', () => {
+      expect(() => systemApi.restoreBackup('../../etc/passwd')).toThrowError(
+        /Snapshot timestamp/
+      );
+      expect(mockInvoke).not.toHaveBeenCalled();
+    });
+
     it('getSandboxState calls get_sandbox_state', async () => {
       const state = { isSandboxed: true, sandboxPath: 'C:\\temp\\sandbox' };
       mockInvoke.mockResolvedValueOnce(state);

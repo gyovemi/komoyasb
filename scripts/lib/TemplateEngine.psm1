@@ -285,6 +285,8 @@ function Invoke-TemplateRendering {
                 "font_size_md"                         = "13px"
                 "variant"                              = "dark"
                 "colors.accent"                        = "#7aa2f7"
+                "colors.bg_primary"                    = "#1a1b26"
+                "colors.fg_primary"                    = "#c0caf5"
                 "colors.background"                    = "#1a1b26"
                 "colors.foreground"                    = "#c0caf5"
             }
@@ -292,7 +294,9 @@ function Invoke-TemplateRendering {
                 $substitutedValue = $fallbacks[$tokenName]
             } elseif ($tokenName.EndsWith("_enabled") -or $tokenName.StartsWith("use_")) {
                 $substitutedValue = "false"
-            } elseif ($tokenName.EndsWith("_ms") -or $tokenName.EndsWith("_duration") -or $tokenName.EndsWith("_width") -or $tokenName.EndsWith("_gap")) {
+            } elseif ($tokenName.EndsWith("_duration") -or $tokenName.EndsWith("_duration_ms") -or $tokenName.EndsWith("_ms")) {
+                $substitutedValue = "0ms"
+            } elseif ($tokenName.EndsWith("_width") -or $tokenName.EndsWith("_gap")) {
                 $substitutedValue = "0"
             } else {
                 $substitutedValue = ""

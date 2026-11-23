@@ -47,7 +47,8 @@
       "../../themes/**/*",
       "../../scripts/**/*",
       "../../install.ps1",
-      "../../uninstall.ps1"
+      "../../uninstall.ps1",
+      "../../performance.json"
     ],
     "windows": {
       "nsis": {

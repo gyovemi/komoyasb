@@ -262,4 +262,12 @@ Describe "watchdog.ps1 Unit & Integration Tests" {
             $stopActions.Count | Should -BeGreaterOrEqual 3
         }
     }
+
+    Context "Named Pipe Readiness Inspection (HIGH-05)" {
+        It "Uses Directory::GetFiles for named pipe readiness check instead of File::Exists" {
+            $watchdogContent = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\watchdog.ps1") -Raw
+            $watchdogContent | Should -Not -Match '\[System\.IO\.File\]::Exists'
+            $watchdogContent | Should -Match '\[System\.IO\.Directory\]::GetFiles\(''\\\\\\\.\\pipe\\'', ''komorebi\*''\)'
+        }
+    }
 }

@@ -8,6 +8,7 @@ use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use std::time::{Duration, Instant};
 use tauri::{Emitter, State, Window};
 use serde::{Deserialize, Serialize};
 
@@ -400,6 +401,9 @@ pub async fn check_deployment_status(state: State<'_, AppState>) -> Result<Deplo
     })
 }
 
+/// Default timeout for interactive provisioning executions (10 minutes).
+pub const PROVISIONING_TIMEOUT: Duration = Duration::from_secs(600);
+
 /// Spawns `install.ps1` with real-time IPC log streaming to the frontend.
 ///
 /// Pipes child process stdout and stderr through asynchronous Tokio background tasks,
@@ -515,8 +519,39 @@ pub async fn run_install_provisioning(
         accumulated_err
     });
 
-    let process_status = child_process.wait()
-        .map_err(|e| AppError::process(format!("Failed waiting for child process: {}", e)))?;
+    let start_time = Instant::now();
+    let poll_interval = Duration::from_millis(100);
+
+    let process_status = loop {
+        match child_process.try_wait() {
+            Ok(Some(status)) => break status,
+            Ok(None) => {
+                if start_time.elapsed() >= PROVISIONING_TIMEOUT {
+                    let _ = child_process.kill();
+                    let _ = child_process.wait();
+                    if let Some(temporary_shadow_dir) = shadow_root_path {
+                        let _ = fs::remove_dir_all(temporary_shadow_dir);
+                    }
+                    return Err(AppError::process(format!(
+                        "Installation provisioning timed out after {}s",
+                        PROVISIONING_TIMEOUT.as_secs()
+                    )));
+                }
+                tokio::time::sleep(poll_interval).await;
+            }
+            Err(e) => {
+                let _ = child_process.kill();
+                let _ = child_process.wait();
+                if let Some(temporary_shadow_dir) = shadow_root_path {
+                    let _ = fs::remove_dir_all(temporary_shadow_dir);
+                }
+                return Err(AppError::process(format!(
+                    "Failed waiting for child process: {}",
+                    e
+                )));
+            }
+        }
+    };
 
     let captured_stdout = stdout_task.await.unwrap_or_default();
     let captured_stderr = stderr_task.await.unwrap_or_default();
@@ -655,12 +690,12 @@ pub async fn get_services_status(state: State<'_, AppState>) -> Result<Vec<Servi
         for (service_name, display_label) in monitored_service_definitions {
             service_status_list.push(ServiceInfo {
                 name: service_name.to_string(),
-                displayName: display_label.to_string(),
-                isRunning: true,
+                display_name: display_label.to_string(),
+                is_running: true,
                 pid: Some(1234),
-                memoryBytes: 42_000_000,
-                cpuPercent: 0.5,
-                uptimeSeconds: 3600,
+                memory_bytes: 42_000_000,
+                cpu_percent: 0.5,
+                uptime_seconds: 3600,
             });
         }
         return Ok(service_status_list);
@@ -684,22 +719,22 @@ pub async fn get_services_status(state: State<'_, AppState>) -> Result<Vec<Servi
         if let Some((process_id, memory_bytes, cpu_percent, uptime_seconds)) = matched_metrics {
             service_status_list.push(ServiceInfo {
                 name: service_name.to_string(),
-                displayName: display_label.to_string(),
-                isRunning: true,
+                display_name: display_label.to_string(),
+                is_running: true,
                 pid: Some(process_id),
-                memoryBytes: memory_bytes,
-                cpuPercent: cpu_percent,
-                uptimeSeconds: uptime_seconds,
+                memory_bytes: memory_bytes,
+                cpu_percent: cpu_percent,
+                uptime_seconds: uptime_seconds,
             });
         } else {
             service_status_list.push(ServiceInfo {
                 name: service_name.to_string(),
-                displayName: display_label.to_string(),
-                isRunning: false,
+                display_name: display_label.to_string(),
+                is_running: false,
                 pid: None,
-                memoryBytes: 0,
-                cpuPercent: 0.0,
-                uptimeSeconds: 0,
+                memory_bytes: 0,
+                cpu_percent: 0.0,
+                uptime_seconds: 0,
             });
         }
     }

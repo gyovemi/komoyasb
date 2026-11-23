@@ -159,7 +159,7 @@ if ($PerformanceProfile) {
     if (Test-Path -LiteralPath $perfJson) {
         try {
             $perfObj = Get-Content -LiteralPath $perfJson -Raw | ConvertFrom-Json
-            if ($perfObj.profiles -and $perfObj.profiles.$PerformanceProfile -and $perfObj.profiles.$PerformanceProfile.dwm) {
+            if ($perfObj.profiles -and $perfObj.profiles.PSObject.Properties[$PerformanceProfile] -and $perfObj.profiles.$PerformanceProfile.dwm) {
                 $dwm = $perfObj.profiles.$PerformanceProfile.dwm
                 if ($effectiveBackdropType -eq 0 -and $dwm.backdrop_type) { $effectiveBackdropType = [int]$dwm.backdrop_type }
                 if ($dwm.rounded_corners) { $effectiveRoundedCorners = [int]$dwm.rounded_corners }

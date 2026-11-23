@@ -141,4 +141,12 @@ Describe "Set-PerformanceProfile.ps1 Unit & Integration Tests" {
             (Test-Path -LiteralPath $perfMarker) | Should -BeTrue
         }
     }
+
+    Context "Komorebic Configuration Reload (HIGH-02)" {
+        It "Checks for komorebic instead of komorebi-cli in reload path" {
+            $scriptContent = Get-Content -LiteralPath (Join-Path $repoRoot "scripts\Set-PerformanceProfile.ps1") -Raw
+            $scriptContent | Should -Not -Match 'komorebi-cli'
+            $scriptContent | Should -Match 'komorebic reload-configuration'
+        }
+    }
 }

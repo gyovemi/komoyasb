@@ -47,9 +47,11 @@ jobs:
       - name: Compute Checksums (SHA256SUMS.txt)
         shell: powershell
         run: |
-          Get-ChildItem -Path dist/*.exe | Get-FileHash -Algorithm SHA256 | ForEach-Object {
+          $checksumLines = Get-ChildItem -Path "dist\*.exe" | Get-FileHash -Algorithm SHA256 | ForEach-Object {
             "$($_.Hash.ToLower())  $($_.Path | Split-Path -Leaf)"
-          } | Set-Content -Path dist/SHA256SUMS.txt -Encoding utf8
+          }
+          $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+          [System.IO.File]::WriteAllLines("dist\SHA256SUMS.txt", [string[]]$checksumLines, $utf8NoBom)
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
@@ -58,6 +60,7 @@ jobs:
           generate_release_notes: true
           files: |
             dist/*.exe
+            dist/*.sha256
             dist/SHA256SUMS.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

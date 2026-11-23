@@ -289,4 +289,15 @@ Describe "apply-windhawk-mods.ps1 Unit & Integration Tests" {
             $registryActions[0].metadata.Enable | Should -BeFalse
         }
     }
+
+    Context "StrictMode PerformanceProfile Property Guard (HIGH-03)" {
+        It "Executes cleanly without StrictMode exception when PerformanceProfile is custom or unlisted" {
+            $testDir = (Get-PSDrive TestDrive).Root
+            $sandboxDir = Join-Path $testDir "windhawk-shadow-custom-profile"
+            Initialize-ShadowContext -ShadowRoot $sandboxDir -KeepSandbox | Out-Null
+
+            $windhawkScript = Join-Path $repoRoot "scripts\apply-windhawk-mods.ps1"
+            { & $windhawkScript -Action "Load" -ModId "taskbar-autohide" -PerformanceProfile "nonexistent-profile-xyz" -DryRun } | Should -Not -Throw
+        }
+    }
 }

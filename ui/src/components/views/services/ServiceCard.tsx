@@ -39,22 +39,43 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ service, onRefresh }) 
   const [activeAction, setActiveAction] = React.useState<ServiceControlAction | null>(null);
   const [actionError, setActionError] = React.useState<string | null>(null);
 
+  const isMountedRef = React.useRef<boolean>(true);
+  const refreshTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (refreshTimerRef.current !== null) {
+        clearTimeout(refreshTimerRef.current);
+      }
+    };
+  }, []);
+
   const handleAction = async (controlAction: ServiceControlAction) => {
     setActiveAction(controlAction);
     setActionError(null);
     try {
       await systemApi.serviceAction(service.name, controlAction);
+      if (refreshTimerRef.current !== null) {
+        clearTimeout(refreshTimerRef.current);
+      }
       // Wait a brief moment before refreshing status
-      setTimeout(() => {
-        onRefresh();
+      refreshTimerRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          onRefresh();
+        }
       }, 500);
     } catch (actionException: unknown) {
+      if (!isMountedRef.current) return;
       const errorMessage = actionException && typeof actionException === 'object' && 'message' in actionException
         ? String((actionException as { message: string }).message)
         : `Failed to ${controlAction} ${service.displayName}`;
       setActionError(errorMessage);
     } finally {
-      setActiveAction(null);
+      if (isMountedRef.current) {
+        setActiveAction(null);
+      }
     }
   };
 

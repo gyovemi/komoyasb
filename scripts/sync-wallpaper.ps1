@@ -96,11 +96,12 @@ if (-not ([System.Management.Automation.PSTypeName]'NativeWallpaper').Type) {
     Add-Type -TypeDefinition $signature -ErrorAction Stop
 }
 
+$repoRoot = if (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) { Get-WorkspaceRoot } else { Split-Path -Parent $scriptDir }
+if (-not $repoRoot) { $repoRoot = (Get-Location).Path }
+
 # Resolve Wallpaper Path
 if ([string]::IsNullOrWhiteSpace($Path)) {
     # Default to dark.png relative to configs/polish/wallpapers
-    $repoRoot = if (Get-Command "Get-WorkspaceRoot" -ErrorAction SilentlyContinue) { Get-WorkspaceRoot } else { Split-Path -Parent $scriptDir }
-    if (-not $repoRoot) { $repoRoot = (Get-Location).Path }
     $defaultPath = Join-Path $repoRoot "configs\polish\wallpapers\dark.png"
     if (Test-Path $defaultPath) {
         $Path = $defaultPath
@@ -112,6 +113,9 @@ if ([string]::IsNullOrWhiteSpace($Path)) {
 # Resolve full path
 if (-not [System.IO.Path]::IsPathRooted($Path)) {
     $resolvedPath = Join-Path (Get-Location).Path $Path
+    if (-not (Test-Path $resolvedPath)) {
+        $resolvedPath = Join-Path $repoRoot $Path
+    }
     if (-not (Test-Path $resolvedPath)) {
         $resolvedPath = Join-Path $scriptDir $Path
     }

@@ -108,6 +108,20 @@ if ($cargoCmd -and $rustcCmd) {
         } finally {
             Pop-Location
         }
+
+        if (Test-Path (Join-Path $scriptRoot "runner\Cargo.toml")) {
+            Write-Host "  [+] Executing Runner crate unit tests..."
+            Push-Location $scriptRoot
+            try {
+                & cargo test --manifest-path (Join-Path $scriptRoot "runner\Cargo.toml") --quiet
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Runner cargo tests failed with exit code $LASTEXITCODE"
+                }
+                Write-Host "      Runner tests passed." -ForegroundColor Green
+            } finally {
+                Pop-Location
+            }
+        }
     }
 } else {
     if ($Strict) {
@@ -147,6 +161,30 @@ if ($cargoCmd) {
     } finally {
         Pop-Location
     }
+
+    # 2.2 Compile standalone runner (komoyasb-run.exe)
+    if (Test-Path (Join-Path $scriptRoot "runner\Cargo.toml")) {
+        Write-Host "  [+] Compiling Standalone Zero-Dependency Runner (komoyasb-run.exe)..."
+        Push-Location $scriptRoot
+        try {
+            & cargo build --release --manifest-path (Join-Path $scriptRoot "runner\Cargo.toml")
+            if ($LASTEXITCODE -ne 0) {
+                if ($Strict) {
+                    throw "Runner compilation failed with exit code $LASTEXITCODE"
+                }
+                Write-Warning "Runner compilation returned exit code $LASTEXITCODE"
+            } else {
+                Write-Host "      Runner compilation completed successfully." -ForegroundColor Green
+            }
+        } catch {
+            if ($Strict) {
+                throw
+            }
+            Write-Warning "Runner compilation encountered an error: $_"
+        } finally {
+            Pop-Location
+        }
+    }
 } else {
     if ($Strict) {
         throw "Cannot compile binary: Cargo/Rust toolchain is not installed on this machine and -Strict was specified."
@@ -166,10 +204,32 @@ if (Test-Path $tauriBundleDir) {
         Copy-Item -LiteralPath $installerExe.FullName -Destination $destPath -Force
         $sha256Hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $destPath).Hash
         $hashFile = "$destPath.sha256"
-        "$sha256Hash  $($installerExe.Name)" | Set-Content -LiteralPath $hashFile -Encoding utf8
+        $writer = [System.IO.StreamWriter]::new($hashFile, $false, [System.Text.UTF8Encoding]::new($false))
+        $writer.Write("$sha256Hash  $($installerExe.Name)`r`n")
+        $writer.Dispose()
         Write-Host "  [+] Copied: $($installerExe.Name) -> $destPath" -ForegroundColor Green
         Write-Host "      SHA256: $sha256Hash"
         $generatedExePath = $destPath
+    }
+}
+
+# Stage standalone komoyasb-run.exe
+$runnerCandidates = @(
+    (Join-Path $scriptRoot "target\release\komoyasb-run.exe"),
+    (Join-Path $scriptRoot "runner\target\release\komoyasb-run.exe")
+)
+foreach ($cand in $runnerCandidates) {
+    if (Test-Path $cand) {
+        $destRunner = Join-Path $distDir "komoyasb-run.exe"
+        Copy-Item -LiteralPath $cand -Destination $destRunner -Force
+        $sha256Hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $destRunner).Hash
+        $hashFile = "$destRunner.sha256"
+        $writer = [System.IO.StreamWriter]::new($hashFile, $false, [System.Text.UTF8Encoding]::new($false))
+        $writer.Write("$sha256Hash  komoyasb-run.exe`r`n")
+        $writer.Dispose()
+        Write-Host "  [+] Copied: komoyasb-run.exe -> $destRunner" -ForegroundColor Green
+        Write-Host "      SHA256: $sha256Hash"
+        break
     }
 }
 
@@ -182,7 +242,11 @@ if (Test-Path $distDir) {
             "$hash  $($_.Name)"
         }
         $shaSumsPath = Join-Path $distDir "SHA256SUMS.txt"
-        $shaSumsLines | Set-Content -LiteralPath $shaSumsPath -Encoding utf8
+        $writer = [System.IO.StreamWriter]::new($shaSumsPath, $false, [System.Text.UTF8Encoding]::new($false))
+        foreach ($line in $shaSumsLines) {
+            $writer.WriteLine($line)
+        }
+        $writer.Dispose()
         Write-Host "  [+] Generated unified SHA256SUMS.txt ($(@($distExeFiles).Count) artifacts)" -ForegroundColor Green
     }
 }
@@ -200,11 +264,22 @@ if ($generatedExePath -and (Test-Path $generatedExePath)) {
     if (Test-Path (Join-Path $distDir "SHA256SUMS.txt")) {
         Write-Host "Checksums File: $(Join-Path $distDir 'SHA256SUMS.txt')" -ForegroundColor Green
     }
+} elseif (Test-Path (Join-Path $distDir "komoyasb-run.exe")) {
+    Write-Host "Status        : RUNNER COMPILED SUCCESSFULLY" -ForegroundColor Green
 } else {
     Write-Host "Status        : CONFIGURATION VERIFIED (Build pending Rust toolchain)" -ForegroundColor Yellow
     Write-Host "Frontend Dist : $(Resolve-Path (Join-Path $uiDir "dist"))"
     Write-Host "Bundled Files : configs/, themes/, scripts/, install.ps1, uninstall.ps1"
     Write-Host "NSIS Hooks    : ui/src-tauri/nsis/hooks.nsh"
     Write-Host "Next Step     : Run `build-release.ps1` after installing Rust (rustup)."
+}
+
+$distRunnerPath = Join-Path $distDir "komoyasb-run.exe"
+if (Test-Path $distRunnerPath) {
+    $runnerItem = Get-Item $distRunnerPath
+    $runnerSizeMb = [Math]::Round($runnerItem.Length / 1MB, 2)
+    Write-Host "Runner Binary : $($runnerItem.FullName)" -ForegroundColor Green
+    Write-Host "Runner Size   : $runnerSizeMb MB ($($runnerItem.Length) bytes)"
+    Write-Host "Runner SHA256 : $($runnerItem.FullName).sha256"
 }
 Write-Host "================================================================" -ForegroundColor Cyan

@@ -22,6 +22,10 @@ describe('ModsView', () => {
     expect(screen.getByText('Launcher & Windhawk Shell Mods')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Flow Launcher/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /Windhawk Mods/i })).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getByText('Flow Launcher Settings')).toBeInTheDocument();
+    });
   });
 
   it('switches between Flow Launcher and Windhawk sub-tabs', async () => {

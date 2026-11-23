@@ -1,0 +1,20 @@
+<Configuration>
+  <Networking>Enable</Networking>
+  <MappedFolders>
+    <!-- 1. Source Repository: Strictly Read-Only Host Mount -->
+    <MappedFolder>
+      <HostFolder>__REPO_DIR__</HostFolder>
+      <SandboxFolder>C:\komoyasb-repo</SandboxFolder>
+      <ReadOnly>true</ReadOnly>
+    </MappedFolder>
+    <!-- 2. Writable Output / Telemetry Exchange Folder -->
+    <MappedFolder>
+      <HostFolder>__LOG_DIR__</HostFolder>
+      <SandboxFolder>C:\komoyasb-output</SandboxFolder>
+      <ReadOnly>false</ReadOnly>
+    </MappedFolder>
+  </MappedFolders>
+  <LogonCommand>
+    <Command>__COMMAND__</Command>
+  </LogonCommand>
+</Configuration>

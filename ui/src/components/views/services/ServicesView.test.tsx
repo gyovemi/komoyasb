@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { ServicesView } from './ServicesView';
 import { systemApi } from '@/lib/ipc';
@@ -179,7 +179,10 @@ describe('ServicesView Component', () => {
 
     render(<ServicesView />);
 
-    await vi.advanceTimersByTimeAsync(4500);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(4500);
+    });
+
     expect(systemApi.getServicesStatus).toHaveBeenCalledTimes(2);
 
     vi.useRealTimers();

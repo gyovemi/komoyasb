@@ -66,9 +66,10 @@ async fn test_get_services_status_sandboxed_and_live() {
     let services = get_services_status(state_sandboxed).await.expect("get_services_status failed");
     assert_eq!(services.len(), 4);
     for svc in services {
-        assert!(svc.isRunning);
+        assert!(svc.is_running);
         assert!(svc.pid.is_some());
-        assert!(svc.memoryBytes > 0);
+        assert!(svc.memory_bytes > 0);
+        assert!(!svc.display_name.is_empty());
     }
 
     // Live mode queries system telemetry
@@ -360,4 +361,54 @@ async fn test_service_action_supports_bulk_all_and_individual_services() {
     // Invalid service names rejected by validation
     let bad_res = service_action(state, "../evil_service".to_string(), ServiceControlAction::Restart).await;
     assert!(bad_res.is_err());
+}
+
+#[tokio::test]
+async fn test_service_info_serde_mapping() {
+    let info = ServiceInfo {
+        name: "komorebi".to_string(),
+        display_name: "Komorebi Window Manager".to_string(),
+        is_running: true,
+        pid: Some(4242),
+        memory_bytes: 52_428_800,
+        cpu_percent: 1.5,
+        uptime_seconds: 7200,
+    };
+
+    // Serialize to JSON and verify camelCase keys expected by frontend
+    let json_value = serde_json::to_value(&info).expect("Failed to serialize ServiceInfo");
+    assert_eq!(json_value["name"], "komorebi");
+    assert_eq!(json_value["displayName"], "Komorebi Window Manager");
+    assert_eq!(json_value["isRunning"], true);
+    assert_eq!(json_value["pid"], 4242);
+    assert_eq!(json_value["memoryBytes"], 52_428_800);
+    assert_eq!(json_value["cpuPercent"], 1.5);
+    assert_eq!(json_value["uptimeSeconds"], 7200);
+
+    // Deserialize from JSON with camelCase keys back into Rust snake_case struct
+    let deserialized: ServiceInfo = serde_json::from_value(json_value).expect("Failed to deserialize ServiceInfo");
+    assert_eq!(deserialized.name, "komorebi");
+    assert_eq!(deserialized.display_name, "Komorebi Window Manager");
+    assert!(deserialized.is_running);
+    assert_eq!(deserialized.pid, Some(4242));
+    assert_eq!(deserialized.memory_bytes, 52_428_800);
+    assert!((deserialized.cpu_percent - 1.5).abs() < f32::EPSILON);
+    assert_eq!(deserialized.uptime_seconds, 7200);
+}
+
+#[tokio::test]
+async fn test_tauri_bundle_includes_performance_json() {
+    let tauri_conf_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tauri.conf.json");
+    let conf_content = fs::read_to_string(&tauri_conf_path).expect("Failed to read tauri.conf.json");
+    let conf_json: serde_json::Value = serde_json::from_str(&conf_content).expect("Failed to parse tauri.conf.json");
+
+    let resources = conf_json["bundle"]["resources"]
+        .as_array()
+        .expect("bundle.resources is not an array");
+
+    let has_performance_json = resources
+        .iter()
+        .any(|v| v.as_str() == Some("../../performance.json"));
+
+    assert!(has_performance_json, "tauri.conf.json bundle.resources must contain ../../performance.json");
 }

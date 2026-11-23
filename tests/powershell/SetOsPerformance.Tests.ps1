@@ -215,4 +215,19 @@ Describe "Set-OsPerformance.ps1 Unit & Integration Tests" {
             { & $setOsPerfScript -Action "Restore" -WhatIf } | Should -Not -Throw
         }
     }
+
+    Context "StrictMode Custom Profile Property Guard (HIGH-04)" {
+        It "Applies 'custom' profile without StrictMode terminating exception" {
+            $testDir = (Get-PSDrive TestDrive).Root
+            $sandboxDir = Join-Path $testDir "osperf-shadow-custom"
+            Initialize-ShadowContext -ShadowRoot $sandboxDir -KeepSandbox | Out-Null
+
+            $setOsPerfScript = Join-Path $repoRoot "scripts\Set-OsPerformance.ps1"
+            { & $setOsPerfScript -Profile "custom" -Action "Apply" -DryRun } | Should -Not -Throw
+
+            $ledger = Export-ShadowLedger
+            $actions = @($ledger.actions | Where-Object { $_.actionType -eq "ProcessControl" })
+            $actions.Count | Should -BeGreaterThan 0
+        }
+    }
 }

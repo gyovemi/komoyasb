@@ -161,10 +161,10 @@ if ($isDry) {
     }
     Write-Host "[DRYRUN] Simulated configuration reload for komorebi and yasb"
 } else {
-    # Check if komorebi-cli is available to reload configuration cleanly
-    if (Get-Command "komorebi-cli" -ErrorAction SilentlyContinue) {
+    # Check if komorebic is available to reload configuration cleanly
+    if (Get-Command "komorebic" -ErrorAction SilentlyContinue) {
         try {
-            komorebi-cli reload-configuration
+            komorebic reload-configuration
             Write-Host "Reloaded komorebi configuration."
         } catch {
             Write-Warning "Failed to reload komorebi via CLI: $_"

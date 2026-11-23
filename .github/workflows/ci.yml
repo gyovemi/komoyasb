@@ -117,6 +117,40 @@ jobs:
       - name: Cargo Backend Tests
         run: cargo test --all-features
 
+  rust-runner-quality:
+    name: Rust Runner Quality Gates (komoyasb-run)
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cargo Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-runner-${{ hashFiles('runner/Cargo.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-runner-
+
+      - name: Rustfmt Check
+        run: cargo fmt --manifest-path runner/Cargo.toml --all -- --check
+
+      - name: Clippy Static Linting
+        run: cargo clippy --manifest-path runner/Cargo.toml --all-targets --all-features -- -D warnings
+
+      - name: Cargo Runner Tests
+        run: cargo test --manifest-path runner/Cargo.toml --all-features
+
   dry-run-matrix:
     name: Full Dry-Run Matrix (${{ matrix.mode }})
     runs-on: windows-latest
@@ -131,4 +165,21 @@ jobs:
       - name: Run Full Dry-Run Harness (${{ matrix.mode }})
         shell: powershell
         run: |
-          powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-FullDryRun.ps1
+          $dryRunArgs = @()
+          if ("${{ matrix.mode }}" -eq "no-admin") {
+            $dryRunArgs += "-NoAdmin"
+          }
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-FullDryRun.ps1 @dryRunArgs
+
+  sandbox-isolation-gate:
+    name: Sandbox Isolation & Zero Host Mutation Gate
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Sandbox Isolation & Zero-Mutation Gate
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Test-SandboxIsolation.ps1
+

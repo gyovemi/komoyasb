@@ -1,4 +1,4 @@
-﻿{
+{
   "$schema": "https://raw.githubusercontent.com/fluent-flyout/fluentflyout/main/schema.json",
   "General": {
     "RunAtStartup": true,
@@ -20,7 +20,7 @@
     "CornerRadius": 8,
     "FontFamily": "JetBrainsMono Nerd Font",
     "FontSize": "13px",
-    "Opacity": 0.90
+    "Opacity": 0.9
   },
   "Placement": {
     "Alignment": "TopCenter",

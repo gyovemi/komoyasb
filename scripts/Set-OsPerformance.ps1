@@ -285,7 +285,7 @@ $osConfig = $null
 if (Test-Path -LiteralPath $perfJsonPath) {
     try {
         $perfConfig = Get-Content -LiteralPath $perfJsonPath -Raw | ConvertFrom-Json
-        if ($perfConfig.profiles -and $perfConfig.profiles.$Profile -and $perfConfig.profiles.$Profile.os) {
+        if ($perfConfig.profiles -and $perfConfig.profiles.PSObject.Properties[$Profile] -and $perfConfig.profiles.$Profile.os) {
             $osConfig = $perfConfig.profiles.$Profile.os
         }
     } catch {

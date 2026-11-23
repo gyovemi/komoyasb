@@ -262,10 +262,10 @@ if ($rootlessMode -and -not ($forwardList -contains "-NoAdmin")) {
 Write-Host "[komoyasb:bootstrap] Invoking installer: $installerScript" -ForegroundColor Green
 if (@($forwardList).Count -gt 0) {
     Write-Host "[komoyasb:bootstrap] Forwarding arguments: $($forwardList -join ' ')" -ForegroundColor DarkGray
-    powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installerScript $forwardList
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$installerScript" @forwardList
 }
 else {
-    powershell.exe -NoProfile -ExecutionPolicy Bypass -File $installerScript
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$installerScript"
 }
 
 if ($LASTEXITCODE -ne 0) {

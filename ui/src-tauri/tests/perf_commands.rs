@@ -86,10 +86,30 @@ async fn test_set_performance_profile_all_presets_under_dryrun() {
         assert!(res.rendered_files.contains(&"configs/komorebi/komorebi.json".to_string()));
         assert!(res.reloaded_services.contains(&"komorebi".to_string()));
 
-        // Check themes/.current_perf was updated
+        // Under dry-run, live marker and performance.json MUST NOT be mutated
         let perf_marker = fs::read_to_string(repo.path().join("themes").join(".current_perf")).unwrap();
-        assert_eq!(perf_marker.trim(), preset);
+        assert_eq!(perf_marker.trim(), "balanced");
+
+        let perf_json = fs::read_to_string(repo.path().join("performance.json")).unwrap();
+        assert!(perf_json.contains("\"active_profile\": \"balanced\""));
     }
+}
+
+#[tokio::test]
+async fn test_set_performance_profile_live_mutates_files() {
+    let repo = setup_test_repo();
+    let app_state = create_test_app_state(repo.path().to_path_buf());
+    let state = mock_state(&app_state);
+
+    let apply_result = set_performance_profile(state.clone(), "ultra-low".to_string(), false).await;
+    assert!(apply_result.is_ok(), "live set_performance_profile failed: {:?}", apply_result.err());
+
+    // In live non-dry-run mode, marker and performance.json are updated
+    let perf_marker = fs::read_to_string(repo.path().join("themes").join(".current_perf")).unwrap();
+    assert_eq!(perf_marker.trim(), "ultra-low");
+
+    let perf_json = fs::read_to_string(repo.path().join("performance.json")).unwrap();
+    assert!(perf_json.contains("\"active_profile\": \"ultra-low\""));
 }
 
 #[tokio::test]
@@ -106,10 +126,9 @@ async fn test_set_performance_profile_sandbox_isolation() {
     let live_marker = fs::read_to_string(repo.path().join("themes").join(".current_perf")).unwrap();
     assert_eq!(live_marker.trim(), "balanced");
 
-    // Shadow sandbox marker updated
-    let shadow_marker = sandbox.path().join("repo").join("themes").join(".current_perf");
-    assert!(shadow_marker.exists());
-    assert_eq!(fs::read_to_string(shadow_marker).unwrap().trim(), "gaming");
+    // Under sandbox isolation, live performance.json is also unchanged
+    let live_perf_json = fs::read_to_string(repo.path().join("performance.json")).unwrap();
+    assert!(live_perf_json.contains("\"active_profile\": \"balanced\""));
 }
 
 #[tokio::test]

@@ -153,6 +153,7 @@ describe('BackupRestoreModal Component', () => {
     const handleClose = vi.fn();
 
     render(<BackupRestoreModal isOpen={true} onClose={handleClose} />);
+    expect(await screen.findByText('No Backups Found')).toBeInTheDocument();
 
     const closeBtns = screen.getAllByRole('button', { name: /close/i });
     fireEvent.click(closeBtns[closeBtns.length - 1]);
@@ -165,6 +166,7 @@ describe('BackupRestoreModal Component', () => {
     const handleClose = vi.fn();
 
     render(<BackupRestoreModal isOpen={true} onClose={handleClose} />);
+    expect(await screen.findByText('No Backups Found')).toBeInTheDocument();
 
     const closeBtns = screen.getAllByRole('button', { name: /close/i });
     fireEvent.click(closeBtns[0]);

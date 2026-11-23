@@ -34,7 +34,10 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [switch]$KeepSandbox
+    [switch]$KeepSandbox,
+
+    [Parameter(Mandatory = $false)]
+    [switch]$NoAdmin
 )
 
 Set-StrictMode -Version Latest
@@ -58,6 +61,7 @@ Write-Host "  komoyasb Full Dry-Run & Host Zero-Mutation Harness Gate       " -F
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host "Repo Root   : $repoRoot" -ForegroundColor Gray
 Write-Host "KeepSandbox : $KeepSandbox" -ForegroundColor Gray
+Write-Host "NoAdmin     : $NoAdmin" -ForegroundColor Gray
 
 # Define live host targets to monitor
 $userProfile = if ($env:USERPROFILE) { $env:USERPROFILE } else { [System.Environment]::GetFolderPath([System.Environment+SpecialFolder]::UserProfile) }
@@ -506,8 +510,10 @@ try {
     # -------------------------------------------------------------------------
     Write-Host "`n>>> Step 2: Executing install.ps1 in DryRun mode with sandbox: $testSandbox" -ForegroundColor Yellow
     
+    $step2Args = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$installScript`"", "-DryRun", "-SandboxRoot", "`"$testSandbox`"", "-LedgerPath", "`"$testLedger`"", "-KeepSandbox")
+    if ($NoAdmin) { $step2Args += "-NoAdmin" }
     $proc = Start-Process -FilePath "powershell.exe" `
-        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$installScript`"", "-DryRun", "-SandboxRoot", "`"$testSandbox`"", "-LedgerPath", "`"$testLedger`"", "-KeepSandbox") `
+        -ArgumentList $step2Args `
         -NoNewWindow -Wait -PassThru
 
     if ($proc.ExitCode -ne 0) {
@@ -544,8 +550,10 @@ try {
     # STEP 5: INSTALL #2 (IDEMPOTENCY CHECK)
     # -------------------------------------------------------------------------
     Write-Host "`n>>> Step 5: Executing install.ps1 second time to verify idempotency..." -ForegroundColor Yellow
+    $step5Args = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$installScript`"", "-DryRun", "-SandboxRoot", "`"$testSandbox`"", "-KeepSandbox")
+    if ($NoAdmin) { $step5Args += "-NoAdmin" }
     $proc2 = Start-Process -FilePath "powershell.exe" `
-        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$installScript`"", "-DryRun", "-SandboxRoot", "`"$testSandbox`"", "-KeepSandbox") `
+        -ArgumentList $step5Args `
         -NoNewWindow -Wait -PassThru
 
     if ($proc2.ExitCode -ne 0) {
@@ -557,8 +565,10 @@ try {
     # STEP 6: UNINSTALL ROLLBACK
     # -------------------------------------------------------------------------
     Write-Host "`n>>> Step 6: Executing uninstall.ps1 in DryRun mode against sandbox..." -ForegroundColor Yellow
+    $step6Args = @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$uninstallScript`"", "-DryRun", "-SandboxRoot", "`"$testSandbox`"", "-KeepSandbox")
+    if ($NoAdmin) { $step6Args += "-NoAdmin" }
     $proc3 = Start-Process -FilePath "powershell.exe" `
-        -ArgumentList @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "`"$uninstallScript`"", "-DryRun", "-SandboxRoot", "`"$testSandbox`"", "-KeepSandbox") `
+        -ArgumentList $step6Args `
         -NoNewWindow -Wait -PassThru
 
     if ($proc3.ExitCode -ne 0) {

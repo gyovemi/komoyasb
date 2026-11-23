@@ -68,7 +68,7 @@ $watchedServices = @(
         Executable     = "komorebi"
         Arguments      = @("-c", (Join-Path $userProfile ".config\komorebi\komorebi.json"))
         CheckReadiness = {
-            if ([System.IO.File]::Exists('\\.\pipe\komorebi')) { return $true }
+            if ([System.IO.Directory]::GetFiles('\\.\pipe\', 'komorebi*').Length -gt 0) { return $true }
             if (Test-CommandAvailable -CommandName "komorebic") {
                 & komorebic ping 2>&1 | Out-Null
                 return ($LASTEXITCODE -eq 0)

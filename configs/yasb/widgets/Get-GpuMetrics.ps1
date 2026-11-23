@@ -31,106 +31,137 @@ param(
     [switch]$SkipIfThrottled
 )
 
-$ErrorActionPreference = 'SilentlyContinue'
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
-# If SkipIfThrottled or IntervalMs >= 30000ms (gaming/ultra-low profile), check cache or skip heavy polling
-$cacheFile = Join-Path ([System.IO.Path]::GetTempPath()) "komoyasb_gpu_metrics_cache.json"
-$currentTimeUtc = [DateTime]::UtcNow
+try {
+    # If SkipIfThrottled or IntervalMs >= 30000ms (gaming/ultra-low profile), check cache or skip heavy polling
+    $cacheFile = Join-Path ([System.IO.Path]::GetTempPath()) "komoyasb_gpu_metrics_cache.json"
+    $currentTimeUtc = [DateTime]::UtcNow
 
-# Check active performance profile if not explicitly passed
-$activePerformanceProfile = "balanced"
-$perfMarkerPath = Join-Path $PSScriptRoot "..\..\..\themes\.current_perf"
-if (Test-Path -LiteralPath $perfMarkerPath) {
-    try {
-        $activePerformanceProfile = (Get-Content -Path $perfMarkerPath -Raw -ErrorAction SilentlyContinue).Trim()
-    } catch {}
-}
-
-# In gaming profile or when IntervalMs >= 30000, avoid frequent expensive counter calls
-if ($SkipIfThrottled -or $IntervalMs -ge 30000 -or $activePerformanceProfile -eq "gaming") {
-    if (Test-Path -LiteralPath $cacheFile) {
+    # Check active performance profile if not explicitly passed
+    $activePerformanceProfile = "balanced"
+    $perfMarkerPath = Join-Path $PSScriptRoot "..\..\..\themes\.current_perf"
+    if (Test-Path -LiteralPath $perfMarkerPath) {
         try {
-            $cacheContent = Get-Content -LiteralPath $cacheFile -Raw -ErrorAction SilentlyContinue | ConvertFrom-Json
-            if ($cacheContent -and $cacheContent.Timestamp) {
-                $cachedTime = [DateTime]::Parse($cacheContent.Timestamp)
-                $maxCacheAgeSec = if ($IntervalMs -ge 30000) { [Math]::Round($IntervalMs / 1000.0) } else { 30 }
-                if (($currentTimeUtc - $cachedTime).TotalSeconds -lt $maxCacheAgeSec) {
-                    if ($Format -eq "json") {
-                        $cachedResult = [PSCustomObject]@{
-                            load = [int]$cacheContent.load
-                            temp = [int]$cacheContent.temp
-                            name = [string]$cacheContent.name
-                            icon = [char]0xF108
-                            cached = $true
+            $markerRaw = Get-Content -LiteralPath $perfMarkerPath -Raw -ErrorAction SilentlyContinue
+            if ($markerRaw) {
+                $activePerformanceProfile = $markerRaw.Trim()
+            }
+        } catch {}
+    }
+
+    # In gaming profile or when IntervalMs >= 30000, avoid frequent expensive counter calls
+    if ($SkipIfThrottled -or $IntervalMs -ge 30000 -or $activePerformanceProfile -eq "gaming") {
+        if (Test-Path -LiteralPath $cacheFile) {
+            try {
+                $cacheRaw = Get-Content -LiteralPath $cacheFile -Raw -ErrorAction SilentlyContinue
+                if ($cacheRaw) {
+                    $cacheContent = $cacheRaw | ConvertFrom-Json
+                    if ($cacheContent -and $cacheContent.PSObject.Properties['Timestamp'] -and $cacheContent.Timestamp) {
+                        $cachedTime = [DateTime]::Parse($cacheContent.Timestamp)
+                        $maxCacheAgeSec = if ($IntervalMs -ge 30000) { [Math]::Round($IntervalMs / 1000.0) } else { 30 }
+                        if (($currentTimeUtc - $cachedTime).TotalSeconds -lt $maxCacheAgeSec) {
+                            $cLoad = if ($cacheContent.PSObject.Properties['load']) { [int]$cacheContent.load } else { 0 }
+                            $cTemp = if ($cacheContent.PSObject.Properties['temp']) { [int]$cacheContent.temp } else { 0 }
+                            $cName = if ($cacheContent.PSObject.Properties['name']) { [string]$cacheContent.name } else { "GPU" }
+                            if ($Format -eq "json") {
+                                $cachedResult = [PSCustomObject]@{
+                                    load = $cLoad
+                                    temp = $cTemp
+                                    name = $cName
+                                    icon = [char]0xF108
+                                    cached = $true
+                                }
+                                $cachedResult | ConvertTo-Json -Compress
+                                return
+                            } else {
+                                Write-Output "󰢮 ${cLoad}% (${cTemp}°C)"
+                                return
+                            }
                         }
-                        $cachedResult | ConvertTo-Json -Compress
-                        return
-                    } else {
-                        Write-Output "󰢮 $($cacheContent.load)% ($($cacheContent.temp)°C)"
-                        return
+                    }
+                }
+            } catch {}
+        }
+    }
+
+    $gpuLoadPercentage = 0
+    $gpuTemperatureCelsius = 0
+    $gpuDeviceName = "GPU"
+
+    # Try nvidia-smi first
+    $nvidiaSmi = $null
+    try {
+        $nvidiaSmi = Get-Command "nvidia-smi.exe" -ErrorAction SilentlyContinue
+    } catch {}
+
+    if ($nvidiaSmi) {
+        try {
+            $smiOutput = & nvidia-smi --query-gpu=utilization.gpu,temperature.gpu,name --format=csv,noheader,nounits 2>$null
+            if ($smiOutput) {
+                $outputParts = $smiOutput -split ','
+                if (@($outputParts).Count -ge 2) {
+                    $gpuLoadPercentage = [int]($outputParts[0].Trim())
+                    $gpuTemperatureCelsius = [int]($outputParts[1].Trim())
+                    if (@($outputParts).Count -ge 3) {
+                        $gpuDeviceName = $outputParts[2].Trim()
                     }
                 }
             }
         } catch {}
     }
-}
-
-$gpuLoadPercentage = 0
-$gpuTemperatureCelsius = 0
-$gpuDeviceName = "GPU"
-
-# Try nvidia-smi first
-$nvidiaSmi = Get-Command "nvidia-smi.exe" -ErrorAction SilentlyContinue
-if ($nvidiaSmi) {
-    $smiOutput = & nvidia-smi --query-gpu=utilization.gpu,temperature.gpu,name --format=csv,noheader,nounits 2>$null
-    if ($smiOutput) {
-        $outputParts = $smiOutput -split ','
-        if (@($outputParts).Count -ge 2) {
-            $gpuLoadPercentage = [int]($outputParts[0].Trim())
-            $gpuTemperatureCelsius = [int]($outputParts[1].Trim())
-            if (@($outputParts).Count -ge 3) {
-                $gpuDeviceName = $outputParts[2].Trim()
+    else {
+        # Fallback to WMI / Performance Counter for generic GPU 3D engine utilization
+        try {
+            $gpuPerfCounter = Get-Counter '\GPU Engine(*engtype_3D)\Utilization Percentage' -ErrorAction SilentlyContinue
+            if ($gpuPerfCounter -and $gpuPerfCounter.PSObject.Properties['CounterSamples'] -and $gpuPerfCounter.CounterSamples) {
+                $validSamples = $gpuPerfCounter.CounterSamples | Where-Object { $_.CookedValue -gt 0 }
+                if ($validSamples) {
+                    $maxUtilization = ($validSamples | Measure-Object -Property CookedValue -Maximum).Maximum
+                    if ($null -ne $maxUtilization) {
+                        $gpuLoadPercentage = [math]::Round($maxUtilization)
+                    }
+                }
             }
         }
+        catch {
+            $gpuLoadPercentage = 0
+        }
     }
-}
-else {
-    # Fallback to WMI / Performance Counter for generic GPU 3D engine utilization
+
+    # Cache the latest metric result
     try {
-        $gpuPerfCounter = Get-Counter '\GPU Engine(*engtype_3D)\Utilization Percentage' -ErrorAction SilentlyContinue
-        if ($gpuPerfCounter -and $gpuPerfCounter.CounterSamples) {
-            $validSamples = $gpuPerfCounter.CounterSamples | Where-Object { $_.CookedValue -gt 0 }
-            if ($validSamples) {
-                $maxUtilization = ($validSamples | Measure-Object -Property CookedValue -Maximum).Maximum
-                $gpuLoadPercentage = [math]::Round($maxUtilization)
-            }
+        $cachePayload = [PSCustomObject]@{
+            load = $gpuLoadPercentage
+            temp = $gpuTemperatureCelsius
+            name = $gpuDeviceName
+            Timestamp = $currentTimeUtc.ToString("o")
         }
-    }
-    catch {
-        $gpuLoadPercentage = 0
-    }
-}
+        $cachePayload | ConvertTo-Json -Compress | Set-Content -LiteralPath $cacheFile -Force -ErrorAction SilentlyContinue
+    } catch {}
 
-# Cache the latest metric result
-try {
-    $cachePayload = [PSCustomObject]@{
-        load = $gpuLoadPercentage
-        temp = $gpuTemperatureCelsius
-        name = $gpuDeviceName
-        Timestamp = $currentTimeUtc.ToString("o")
+    if ($Format -eq "json") {
+        $formattedResult = [PSCustomObject]@{
+            load = $gpuLoadPercentage
+            temp = $gpuTemperatureCelsius
+            name = $gpuDeviceName
+            icon = [char]0xF108 # Nerd font display icon
+        }
+        $formattedResult | ConvertTo-Json -Compress
     }
-    $cachePayload | ConvertTo-Json -Compress | Set-Content -LiteralPath $cacheFile -Force -ErrorAction SilentlyContinue
-} catch {}
-
-if ($Format -eq "json") {
-    $formattedResult = [PSCustomObject]@{
-        load = $gpuLoadPercentage
-        temp = $gpuTemperatureCelsius
-        name = $gpuDeviceName
-        icon = [char]0xF108 # Nerd font display icon
+    else {
+        Write-Output "󰢮 ${gpuLoadPercentage}% (${gpuTemperatureCelsius}°C)"
     }
-    $formattedResult | ConvertTo-Json -Compress
-}
-else {
-    Write-Output "󰢮 ${gpuLoadPercentage}% (${gpuTemperatureCelsius}°C)"
+} catch {
+    if ($Format -eq "json") {
+        [PSCustomObject]@{
+            load = 0
+            temp = 0
+            name = "GPU"
+            icon = [char]0xF108
+        } | ConvertTo-Json -Compress
+    } else {
+        Write-Output "󰢮 0% (0°C)"
+    }
 }

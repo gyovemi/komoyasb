@@ -70,11 +70,25 @@ export const ServicesView: React.FC = () => {
   const [bulkActionInProgress, setBulkActionInProgress] = React.useState<string | null>(null);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
+  const isMountedRef = React.useRef<boolean>(true);
+  const bulkTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  React.useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (bulkTimerRef.current !== null) {
+        clearTimeout(bulkTimerRef.current);
+      }
+    };
+  }, []);
+
   const fetchServices = React.useCallback(async () => {
     setIsLoadingServices(true);
     setErrorMessage(null);
     try {
       const liveServices = await systemApi.getServicesStatus();
+      if (!isMountedRef.current) return;
       if (liveServices && liveServices.length > 0) {
         setServicesList(liveServices);
       }
@@ -82,7 +96,9 @@ export const ServicesView: React.FC = () => {
       // In sandbox/browser environment, fallback to fallback services
       console.warn('Services status API unavailable; using fallback definitions');
     } finally {
-      setIsLoadingServices(false);
+      if (isMountedRef.current) {
+        setIsLoadingServices(false);
+      }
     }
   }, []);
 
@@ -93,7 +109,9 @@ export const ServicesView: React.FC = () => {
       systemApi
         .getServicesStatus()
         .then((queriedServices) => {
-          if (queriedServices && queriedServices.length > 0) setServicesList(queriedServices);
+          if (isMountedRef.current && queriedServices && queriedServices.length > 0) {
+            setServicesList(queriedServices);
+          }
         })
         .catch(() => {
           // Ignore periodic poll failures
@@ -109,16 +127,24 @@ export const ServicesView: React.FC = () => {
     try {
       // Execute single bulk supervisor action across all managed services
       await systemApi.serviceAction('all', action);
-      setTimeout(() => {
-        fetchServices();
+      if (bulkTimerRef.current !== null) {
+        clearTimeout(bulkTimerRef.current);
+      }
+      bulkTimerRef.current = setTimeout(() => {
+        if (isMountedRef.current) {
+          fetchServices();
+        }
       }, 800);
     } catch (bulkError: unknown) {
+      if (!isMountedRef.current) return;
       const displayMessage = bulkError && typeof bulkError === 'object' && 'message' in bulkError
         ? String((bulkError as { message: string }).message)
         : `Failed to ${action} all services`;
       setErrorMessage(displayMessage);
     } finally {
-      setBulkActionInProgress(null);
+      if (isMountedRef.current) {
+        setBulkActionInProgress(null);
+      }
     }
   };
 

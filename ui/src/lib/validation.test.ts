@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   validateThemeName,
   validatePath,
+  validateSnapshotTimestamp,
   assertValidThemeName,
   assertValidPath,
+  assertValidSnapshotTimestamp,
 } from './validation';
 
 describe('Client-Side Validation Utilities', () => {
@@ -74,6 +76,41 @@ describe('Client-Side Validation Utilities', () => {
 
     it('assertValidPath throws AppError on failure', () => {
       expect(() => assertValidPath('../traversal')).toThrowError();
+    });
+  });
+
+  describe('validateSnapshotTimestamp', () => {
+    it('accepts valid alphanumeric, underscore, and hyphen timestamps', () => {
+      expect(validateSnapshotTimestamp('20261122_120000').valid).toBe(true);
+      expect(validateSnapshotTimestamp('backup-2026-11-22').valid).toBe(true);
+      expect(validateSnapshotTimestamp('snap_01').valid).toBe(true);
+    });
+
+    it('rejects empty, null, or whitespace-only timestamps', () => {
+      expect(validateSnapshotTimestamp('').valid).toBe(false);
+      expect(validateSnapshotTimestamp('   ').valid).toBe(false);
+    });
+
+    it('rejects timestamps with spaces or special characters', () => {
+      expect(validateSnapshotTimestamp('2026 11 22').valid).toBe(false);
+      expect(validateSnapshotTimestamp('backup@123').valid).toBe(false);
+      expect(validateSnapshotTimestamp('snap$').valid).toBe(false);
+    });
+
+    it('rejects path traversal tokens, slashes, or null bytes', () => {
+      expect(validateSnapshotTimestamp('../snap').valid).toBe(false);
+      expect(validateSnapshotTimestamp('dir/snap').valid).toBe(false);
+      expect(validateSnapshotTimestamp('dir\\snap').valid).toBe(false);
+      expect(validateSnapshotTimestamp('snap\0evil').valid).toBe(false);
+    });
+
+    it('assertValidSnapshotTimestamp accepts valid timestamps', () => {
+      expect(() => assertValidSnapshotTimestamp('20261122_090000')).not.toThrow();
+    });
+
+    it('assertValidSnapshotTimestamp throws AppError on invalid timestamps', () => {
+      expect(() => assertValidSnapshotTimestamp('../../bad')).toThrowError();
+      expect(() => assertValidSnapshotTimestamp('invalid spaces')).toThrowError();
     });
   });
 });

@@ -105,6 +105,54 @@ export function validatePath(path: string): ValidationResult {
 }
 
 /**
+ * Validates a configuration backup snapshot timestamp identifier.
+ *
+ * Snapshot timestamps must:
+ * - Be non-empty and between 1 and 64 characters.
+ * - Contain only alphanumeric characters, underscores, and hyphens (`[a-zA-Z0-9_-]`).
+ * - Contain zero directory separators (`/`, `\`), traversal tokens (`..`), or null bytes (`\0`).
+ *
+ * @param timestamp - Candidate snapshot timestamp identifier.
+ * @returns ValidationResult with boolean flag and descriptive error message if invalid.
+ */
+export function validateSnapshotTimestamp(timestamp: string): ValidationResult {
+  if (!timestamp || typeof timestamp !== 'string') {
+    return { valid: false, error: 'Snapshot timestamp must not be empty.' };
+  }
+
+  const trimmed = timestamp.trim();
+  if (trimmed.length === 0) {
+    return { valid: false, error: 'Snapshot timestamp must not be empty or whitespace.' };
+  }
+
+  if (trimmed.length > 64) {
+    return { valid: false, error: 'Snapshot timestamp must not exceed 64 characters.' };
+  }
+
+  if (
+    trimmed.includes('..') ||
+    trimmed.includes('/') ||
+    trimmed.includes('\\') ||
+    trimmed.includes('\0')
+  ) {
+    return {
+      valid: false,
+      error: 'Snapshot timestamp must not contain path traversal tokens, slashes, or null bytes.',
+    };
+  }
+
+  const alphanumericRegex = /^[a-zA-Z0-9_-]+$/;
+  if (!alphanumericRegex.test(trimmed)) {
+    return {
+      valid: false,
+      error: 'Snapshot timestamp must contain only alphanumeric characters, underscores, and hyphens.',
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
  * Asserts that a theme preset name is valid, throwing an AppError if validation fails.
  *
  * @param name - Theme preset name.
@@ -137,3 +185,21 @@ export function assertValidPath(path: string): void {
     throw error;
   }
 }
+
+/**
+ * Asserts that a backup snapshot timestamp is valid, throwing an AppError if validation fails.
+ *
+ * @param timestamp - Candidate snapshot timestamp identifier.
+ * @throws {AppError} If validation fails.
+ */
+export function assertValidSnapshotTimestamp(timestamp: string): void {
+  const result = validateSnapshotTimestamp(timestamp);
+  if (!result.valid) {
+    const error: AppError = {
+      code: 'VALIDATION_FAILED',
+      message: result.error || 'Invalid snapshot timestamp.',
+    };
+    throw error;
+  }
+}
+

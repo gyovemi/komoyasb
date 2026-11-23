@@ -226,4 +226,28 @@ Describe "TemplateEngine Module Unit Tests" {
             (Test-Path -LiteralPath $outputFile) | Should -BeFalse
         }
     }
+
+    Context "Fallback Defaults & Token Alignment (MED-01)" {
+        It "Applies aligned fallback dictionary tokens for colors.bg_primary and colors.fg_primary" {
+            $testDir = (Get-PSDrive TestDrive).Root
+            $templateFile = Join-Path $testDir "colors_fallback.template"
+            $outputFile = Join-Path $testDir "colors_fallback.txt"
+            [System.IO.File]::WriteAllText($templateFile, "bg: {{colors.bg_primary}}; fg: {{colors.fg_primary}}", [System.Text.Encoding]::UTF8)
+
+            Invoke-TemplateRendering -TemplatePath $templateFile -OutputPath $outputFile -Tokens @{}
+            $rendered = [System.IO.File]::ReadAllText($outputFile, [System.Text.Encoding]::UTF8)
+            $rendered | Should -Be "bg: #1a1b26; fg: #c0caf5"
+        }
+
+        It "Emits duration fallbacks with units '0ms' for duration tokens" {
+            $testDir = (Get-PSDrive TestDrive).Root
+            $templateFile = Join-Path $testDir "duration_fallback.template"
+            $outputFile = Join-Path $testDir "duration_fallback.txt"
+            [System.IO.File]::WriteAllText($templateFile, "transition: {{perf.yasb.transition_duration}}; anim: {{animation_duration_ms}}", [System.Text.Encoding]::UTF8)
+
+            Invoke-TemplateRendering -TemplatePath $templateFile -OutputPath $outputFile -Tokens @{}
+            $rendered = [System.IO.File]::ReadAllText($outputFile, [System.Text.Encoding]::UTF8)
+            $rendered | Should -Be "transition: 0ms; anim: 0ms"
+        }
+    }
 }

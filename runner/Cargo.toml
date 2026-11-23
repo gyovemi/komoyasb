@@ -1,0 +1,38 @@
+[package]
+name = "komoyasb-run"
+version = "1.0.0"
+description = "High-performance standalone desktop orchestrator for komoyasb"
+authors = ["Komoyasb Authors"]
+edition = "2021"
+
+[lib]
+name = "komoyasb_run"
+path = "src/lib.rs"
+
+[[bin]]
+name = "komoyasb-run"
+path = "src/main.rs"
+
+[dependencies]
+include_dir = { version = "0.7", features = ["globs"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.9"
+sha2 = "0.10"
+uuid = { version = "1.7", features = ["v4"] }
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "1.0"
+colored = "2.1"
+windows = { version = "0.52", features = [
+    "Win32_Foundation",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Registry",
+    "Win32_System_Console",
+    "Win32_System_Pipes",
+    "Win32_System_Threading",
+    "Win32_Security",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
+[dev-dependencies]
+tempfile = "3.10"

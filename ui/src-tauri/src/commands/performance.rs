@@ -497,28 +497,31 @@ pub async fn set_performance_profile(
 ) -> Result<ApplyResult, AppError> {
     validate_performance_profile(&profile)?;
 
-    // 1. If performance.json exists, update active_profile in it
-    let config_path = get_performance_config_path(&state);
-    if config_path.exists() {
-        if let Ok(file_content) = read_file_string(&config_path) {
-            if let Ok(mut parsed_config) = serde_json::from_str::<PerformanceConfig>(&file_content) {
-                parsed_config.active_profile = profile.clone();
-                if let Ok(serialized_content) = serde_json::to_string_pretty(&parsed_config) {
-                    let _ = atomic_write_file(&config_path, &serialized_content, Some(ConfigFormat::Json));
+    let is_dry_run = dry_run || state.sandbox.is_sandboxed;
+
+    if !is_dry_run {
+        // 1. If performance.json exists, update active_profile in it
+        let config_path = get_performance_config_path(&state);
+        if config_path.exists() {
+            if let Ok(file_content) = read_file_string(&config_path) {
+                if let Ok(mut parsed_config) = serde_json::from_str::<PerformanceConfig>(&file_content) {
+                    parsed_config.active_profile = profile.clone();
+                    if let Ok(serialized_content) = serde_json::to_string_pretty(&parsed_config) {
+                        let _ = atomic_write_file(&config_path, &serialized_content, Some(ConfigFormat::Json));
+                    }
                 }
             }
         }
-    }
 
-    // 2. Write themes/.current_perf marker file
-    let current_perf_path = state.resolve_path(&state.repo_root.join("themes").join(".current_perf"));
-    let _ = atomic_write_file(&current_perf_path, &profile, None);
+        // 2. Write themes/.current_perf marker file
+        let current_perf_path = state.resolve_path(&state.repo_root.join("themes").join(".current_perf"));
+        let _ = atomic_write_file(&current_perf_path, &profile, None);
+    }
 
     // 3. Invoke Set-PerformanceProfile.ps1 (or fallback to sync-theme.ps1)
     let script_path = state.repo_root.join("scripts").join("Set-PerformanceProfile.ps1");
     let fallback_script = state.repo_root.join("scripts").join("sync-theme.ps1");
 
-    let is_dry_run = dry_run || state.sandbox.is_sandboxed;
     let mut command_args = Vec::new();
 
     let target_script = if script_path.exists() {

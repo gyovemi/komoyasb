@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { FirstRunBanner } from './FirstRunBanner';
 import { systemApi } from '@/lib/ipc';
 import { listen } from '@tauri-apps/api/event';
@@ -105,8 +105,11 @@ describe('FirstRunBanner', () => {
     fireEvent.click(dryRunCheckbox);
 
     // Test log streaming
-    if (logCallback) {
-      logCallback({ payload: { line: 'Installing packages...', isError: false } });
+    const activeLogCallback = logCallback;
+    if (activeLogCallback) {
+      act(() => {
+        activeLogCallback({ payload: { line: 'Installing packages...', isError: false } });
+      });
     }
 
     fireEvent.click(screen.getByRole('button', { name: /Start Provisioning/i }));
